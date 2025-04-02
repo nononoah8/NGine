@@ -1,0 +1,44 @@
+# Ignore build directories
+Debug/
+Release/
+x64/
+
+# Ignore Visual Studio files
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.sln
+*.suo
+*.ncb
+*.user
+*.opendb
+*.VC.db
+
+# Ignore CMake-generated files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# Ignore log files and temporary files
+*.log
+*.tmp
+*.obj
+*.pch
+*.idb
+*.ipch
+*.tlog
+*.lastbuildstate
+*.ilk
+*.pdb
+*.exe
+*.exp
+
+# Ignoring unnecessary cmake files
+CMakeCache.txt
+CMakeFiles/
+CMakeOutput.log
+CMakeError.log
+*.cmake
+*.cmake.user
+*.cmake.userstate
