@@ -190,7 +190,7 @@ int main(int argc, char* argv[]) {
     }
     int iTime = 0;
 
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     // Enable depth testing
     glEnable(GL_DEPTH_TEST);
@@ -198,7 +198,11 @@ int main(int argc, char* argv[]) {
     // At the top of main(), add or modify these variables
     float rotationX = 0.0f;
     float rotationY = 0.0f;
-    float rotationSpeed = 0.02f;  // Reduce this value to make rotation slower
+    float rotationSpeed = 0.002f;  // Reduce this value to make rotation slower
+    float positionX = 0.0f;
+    float positionY = 0.0f;
+    float positionZ = 0.0f;
+    float moveSpeed = 0.001f;
 
     // Main render loop
     bool running = true;
@@ -209,19 +213,6 @@ int main(int argc, char* argv[]) {
             if (event.type == SDL_QUIT) {
                 running = false;
             } else if (event.type == SDL_KEYDOWN) {
-                // Inside your event handling loop
-                if (event.key.keysym.sym == SDLK_a) {
-                    rotationY -= rotationSpeed;  // Rotate left around Y-axis
-                }
-                if (event.key.keysym.sym == SDLK_d) {
-                    rotationY += rotationSpeed;  // Rotate right around Y-axis
-                }
-                if (event.key.keysym.sym == SDLK_w) {
-                    rotationX -= rotationSpeed;  // Rotate up around X-axis
-                }
-                if (event.key.keysym.sym == SDLK_s) {
-                    rotationX += rotationSpeed;  // Rotate down around X-axis
-                }
                 if (event.key.keysym.sym == SDLK_ESCAPE) {
                     running = false;
                 }
@@ -232,12 +223,40 @@ int main(int argc, char* argv[]) {
             }
         }
 
+        // Check keyboard state for continuous input
+        const Uint8* keyState = SDL_GetKeyboardState(NULL);
+        if (keyState[SDL_SCANCODE_A]) {
+            rotationY -= rotationSpeed;  // Rotate left around Y-axis
+        }
+        if (keyState[SDL_SCANCODE_D]) {
+            rotationY += rotationSpeed;  // Rotate right around Y-axis
+        }
+        if (keyState[SDL_SCANCODE_W]) {
+            rotationX -= rotationSpeed;  // Rotate up around X-axis
+        }
+        if (keyState[SDL_SCANCODE_S]) {
+            rotationX += rotationSpeed;  // Rotate down around X-axis
+        }
+
         // After getting uniform locations
         GLint modelLoc = glGetUniformLocation(shaderProgram, "model");
 
-        // Inside your render loop, before drawing
-        // Create rotation matrix
+        if (keyState[SDL_SCANCODE_LEFT]) {
+            positionX -= moveSpeed;  // Move left
+        }
+        if (keyState[SDL_SCANCODE_RIGHT]) {
+            positionX += moveSpeed;  // Move right
+        }
+        if (keyState[SDL_SCANCODE_UP]) {
+            positionY += moveSpeed;  // Move up
+        }
+        if (keyState[SDL_SCANCODE_DOWN]) {
+            positionY -= moveSpeed;  // Move down
+        }
+
+        // Create combined transformation matrix
         glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(positionX, positionY, positionZ));
         model = glm::rotate(model, rotationX, glm::vec3(1.0f, 0.0f, 0.0f));
         model = glm::rotate(model, rotationY, glm::vec3(0.0f, 1.0f, 0.0f));
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
