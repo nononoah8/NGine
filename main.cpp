@@ -289,3 +289,17 @@ int main(int argc, char* argv[]) {
 
     return 0;
 }
+
+/*
+Next steps:
+* Make more shapes and make them more accessible and easier to use by creating a mesh class, and a shape generator
+* Need to have a light and camera manager, and make a renderer manager.
+* Also have a transform class
+* Implement the input manager, scene manager, and engine manager, and others.
+* Can use https://github.com/assimp/assimp - assimp for asset importing for models and whatnot.
+* Add physics engine - https://github.com/jrouwe/JoltPhysics, https://github.com/NVIDIA-Omniverse/PhysX, https://github.com/bulletphysics/bullet3, etc.
+* Entity-Component system
+* Debugging framework
+* Paticle System
+* UI Framework (Dear ImGui)
+*/
