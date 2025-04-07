@@ -4,34 +4,49 @@ project(main)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Wall -fdiagnostics-color=always")
 
+# Set Debug as default build type if not specified
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Debug)
+endif()
+
+# Set output directories
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/Debug)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/Release)
+
+# Use file(GLOB...) to find all source files
+file(GLOB_RECURSE SRC_FILES 
+    "${CMAKE_SOURCE_DIR}/src/*.cpp"
+)
+
+# Define sources list
 set(SOURCES
-    main.cpp
-    include/glad/glad.c
+    ${SRC_FILES}
+    ${CMAKE_SOURCE_DIR}/include/glad/glad.c
 )
 
 if(APPLE)
     # macOS-specific configuration
     include_directories(
-        /Users/noahdujovny/Documents/EECS/EECS498-007/3d_test/include
-        /Users/noahdujovny/Documents/EECS/EECS498-007/3d_test/lib
+        ${CMAKE_SOURCE_DIR}/include
+        ${CMAKE_SOURCE_DIR}/lib
     )
     link_directories(
-        /Users/noahdujovny/Documents/EECS/EECS498-007/3d_test/lib/glfw
-        /Users/noahdujovny/Documents/EECS/EECS498-007/3d_test/lib/SDL2
-        /Users/noahdujovny/Documents/EECS/EECS498-007/3d_test/lib/SDL2_Mixer
-        /Users/noahdujovny/Documents/EECS/EECS498-007/3d_test/lib/SDL2_ttf
+        ${CMAKE_SOURCE_DIR}/lib/glfw
+        ${CMAKE_SOURCE_DIR}/lib/SDL2
+        ${CMAKE_SOURCE_DIR}/lib/SDL2_Mixer
+        ${CMAKE_SOURCE_DIR}/lib/SDL2_ttf
     )
 
     add_executable(app ${SOURCES})
 
     # Link GLFW
-    find_library(GLFW_LIBRARY NAMES libglfw.3.3.dylib PATHS /Users/noahdujovny/Documents/EECS/EECS498-007/3d_test/lib/glfw)
+    find_library(GLFW_LIBRARY NAMES libglfw.3.3.dylib PATHS ${CMAKE_SOURCE_DIR}/lib/glfw)
     target_link_libraries(app ${GLFW_LIBRARY})
 
     # Link SDL2 libraries
-    find_library(SDL2_LIBRARY NAMES SDL2 PATHS /Users/noahdujovny/Documents/EECS/EECS498-007/3d_test/lib/SDL2/lib)
-    find_library(SDL2_MIXER_LIBRARY NAMES SDL2_mixer PATHS /Users/noahdujovny/Documents/EECS/EECS498-007/3d_test/lib/SDL2_Mixer/lib)
-    find_library(SDL2_TTF_LIBRARY NAMES SDL2_ttf PATHS /Users/noahdujovny/Documents/EECS/EECS498-007/3d_test/lib/SDL2_ttf/lib)
+    find_library(SDL2_LIBRARY NAMES SDL2 PATHS ${CMAKE_SOURCE_DIR}/lib/SDL2/lib)
+    find_library(SDL2_MIXER_LIBRARY NAMES SDL2_mixer PATHS ${CMAKE_SOURCE_DIR}/lib/SDL2_Mixer/lib)
+    find_library(SDL2_TTF_LIBRARY NAMES SDL2_ttf PATHS ${CMAKE_SOURCE_DIR}/lib/SDL2_ttf/lib)
 
     # Add SDL libraries to the target
     target_link_libraries(app 
@@ -54,27 +69,27 @@ if(APPLE)
 elseif(WIN32)
     # Windows-specific configuration
     include_directories(
-        C:/Users/noahd/Documents/EECS/EECS498-007/3d_test/include
-        C:/Users/noahd/Documents/EECS/EECS498-007/3d_test/lib
+        ${CMAKE_SOURCE_DIR}/include
+        ${CMAKE_SOURCE_DIR}/lib
     )
     link_directories(
-        C:/Users/noahd/Documents/EECS/EECS498-007/3d_test/lib/glfw
-        C:/Users/noahd/Documents/EECS/EECS498-007/3d_test/lib/SDL2
-        C:/Users/noahd/Documents/EECS/EECS498-007/3d_test/lib/SDL2_Mixer
-        C:/Users/noahd/Documents/EECS/EECS498-007/3d_test/lib/SDL2_ttf
+        ${CMAKE_SOURCE_DIR}/lib/glfw
+        ${CMAKE_SOURCE_DIR}/lib/SDL2
+        ${CMAKE_SOURCE_DIR}/lib/SDL2_Mixer
+        ${CMAKE_SOURCE_DIR}/lib/SDL2_ttf
     )
 
     add_executable(app ${SOURCES})
 
     # Link GLFW
-    find_library(GLFW_LIBRARY NAMES glfw3.lib PATHS C:/Users/noahd/Documents/EECS/EECS498-007/3d_test/lib/glfw)
+    find_library(GLFW_LIBRARY NAMES glfw3.lib PATHS ${CMAKE_SOURCE_DIR}/lib/glfw)
     target_link_libraries(app ${GLFW_LIBRARY})
 
     # Link SDL2 libraries
-    find_library(SDL2_LIBRARY NAMES SDL2.lib PATHS C:/Users/noahd/Documents/EECS/EECS498-007/3d_test/lib/SDL2/lib)
-    find_library(SDL2_MAIN_LIBRARY NAMES SDL2main.lib PATHS C:/Users/noahd/Documents/EECS/EECS498-007/3d_test/lib/SDL2/lib)
-    find_library(SDL2_MIXER_LIBRARY NAMES SDL2_mixer.lib PATHS C:/Users/noahd/Documents/EECS/EECS498-007/3d_test/lib/SDL2_Mixer/lib)
-    find_library(SDL2_TTF_LIBRARY NAMES SDL2_ttf.lib PATHS C:/Users/noahd/Documents/EECS/EECS498-007/3d_test/lib/SDL2_ttf/lib)
+    find_library(SDL2_LIBRARY NAMES SDL2.lib PATHS ${CMAKE_SOURCE_DIR}/lib/SDL2/lib)
+    find_library(SDL2_MAIN_LIBRARY NAMES SDL2main.lib PATHS ${CMAKE_SOURCE_DIR}/lib/SDL2/lib)
+    find_library(SDL2_MIXER_LIBRARY NAMES SDL2_mixer.lib PATHS ${CMAKE_SOURCE_DIR}/lib/SDL2_Mixer/lib)
+    find_library(SDL2_TTF_LIBRARY NAMES SDL2_ttf.lib PATHS ${CMAKE_SOURCE_DIR}/lib/SDL2_ttf/lib)
 
     # Add SDL libraries to the target
     target_link_libraries(app 
@@ -104,3 +119,7 @@ elseif(WIN32)
         )
     endforeach()
 endif()
+
+# Print some debugging information
+message(STATUS "Source files: ${SOURCES}")
+message(STATUS "Output directory: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}")

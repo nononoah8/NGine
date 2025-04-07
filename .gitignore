@@ -2,6 +2,7 @@
 Debug/
 Release/
 x64/
+build/
 
 # Ignore Visual Studio files
 *.vcxproj
