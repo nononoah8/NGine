@@ -14,6 +14,7 @@
 #include "Shader.h"
 #include "Mesh.h"
 #include "Shapes/Cube.h"
+#include "Shapes/Sphere.h"
 
 
 int main(int argc, char* argv[]) {
@@ -86,10 +87,9 @@ int main(int argc, char* argv[]) {
     int iTime = 0;
 
     // Create a cube
-    std::unique_ptr<Mesh> cube = Shape::Cube::Create(1.0f, glm::vec3(1.0f, 1.0f, 0.0f));
+    std::unique_ptr<Mesh> sphere = Shape::Sphere::Create(1.0f);
 
-
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     // Enable depth testing
     glEnable(GL_DEPTH_TEST);
@@ -166,7 +166,7 @@ int main(int argc, char* argv[]) {
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
         // Draw the cube
-        cube->Draw();
+        sphere->Draw();
 
         // Swap buffers
         SDL_GL_SwapWindow(window);

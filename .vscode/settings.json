@@ -51,6 +51,7 @@
     "variant": "cpp",
     "vector": "cpp",
     "xstring": "cpp",
-    "sstream": "cpp"
+    "sstream": "cpp",
+    "memory": "cpp"
   }
 }
