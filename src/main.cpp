@@ -124,30 +124,19 @@ int main(int argc, char* argv[]) {
 
         // Check keyboard state for continuous input
         const Uint8* keyState = SDL_GetKeyboardState(NULL);
-        if (keyState[SDL_SCANCODE_A]) {
-            rotationY -= rotationSpeed;  // Rotate left around Y-axis
-        }
-        if (keyState[SDL_SCANCODE_D]) {
-            rotationY += rotationSpeed;  // Rotate right around Y-axis
-        }
-        if (keyState[SDL_SCANCODE_W]) {
-            rotationX -= rotationSpeed;  // Rotate up around X-axis
-        }
-        if (keyState[SDL_SCANCODE_S]) {
-            rotationX += rotationSpeed;  // Rotate down around X-axis
-        }
-        if (keyState[SDL_SCANCODE_LEFT]) {
-            positionX -= moveSpeed;  // Move left
-        }
-        if (keyState[SDL_SCANCODE_RIGHT]) {
-            positionX += moveSpeed;  // Move right
-        }
-        if (keyState[SDL_SCANCODE_UP]) {
-            positionY += moveSpeed;  // Move up
-        }
-        if (keyState[SDL_SCANCODE_DOWN]) {
-            positionY -= moveSpeed;  // Move down
-        }
+        // Rotation
+        if (keyState[SDL_SCANCODE_A]) rotationY -= rotationSpeed;
+        if (keyState[SDL_SCANCODE_D]) rotationY += rotationSpeed;
+        if (keyState[SDL_SCANCODE_W]) rotationX -= rotationSpeed;
+        if (keyState[SDL_SCANCODE_S]) rotationX += rotationSpeed;
+        
+        // Position
+        if (keyState[SDL_SCANCODE_LEFT]) positionX -= moveSpeed;
+        if (keyState[SDL_SCANCODE_RIGHT]) positionX += moveSpeed;
+        if (keyState[SDL_SCANCODE_UP]) positionY += moveSpeed;
+        if (keyState[SDL_SCANCODE_DOWN]) positionY -= moveSpeed;
+        if (keyState[SDL_SCANCODE_Q]) positionZ += moveSpeed;
+        if (keyState[SDL_SCANCODE_E]) positionZ -= moveSpeed;
 
         // Create combined transformation matrix
         glm::mat4 model = glm::mat4(1.0f);
@@ -184,7 +173,6 @@ int main(int argc, char* argv[]) {
 
 /*
 Next steps:
-* Make more shapes and make them more accessible and easier to use by creating a mesh class, and a shape generator
 * Need to have a light and camera manager, and make a renderer manager.
 * Also have a transform class
 * Implement the input manager, scene manager, and engine manager, and others.

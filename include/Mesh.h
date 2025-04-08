@@ -5,6 +5,21 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 
+struct Vertex {
+  glm::vec3 position;
+  glm::vec3 normal;
+  glm::vec2 texCoords;
+  glm::vec3 tangent;
+  glm::vec3 bitangent;
+};
+
+struct Material {
+  unsigned int diffuseMap;
+  unsigned int specularMap;
+  unsigned int normalMap;
+  float shininess;
+};
+
 class Mesh {
 private:
   GLuint VAO, VBO, EBO;

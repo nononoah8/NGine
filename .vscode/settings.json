@@ -52,6 +52,8 @@
     "vector": "cpp",
     "xstring": "cpp",
     "sstream": "cpp",
-    "memory": "cpp"
+    "memory": "cpp",
+    "algorithm": "cpp",
+    "complex": "cpp"
   }
 }
