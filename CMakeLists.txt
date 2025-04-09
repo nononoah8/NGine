@@ -18,9 +18,15 @@ file(GLOB_RECURSE SRC_FILES
     "${CMAKE_SOURCE_DIR}/src/*.cpp"
 )
 
+# If LuaBridge has .cpp files that need to be compiled
+file(GLOB_RECURSE LUABRIDGE_SRC_FILES 
+    "${CMAKE_SOURCE_DIR}/include/Lua/*.c"
+)
+
 # Define sources list
 set(SOURCES
     ${SRC_FILES}
+    ${LUABRIDGE_SRC_FILES}
     ${CMAKE_SOURCE_DIR}/include/glad/glad.c
 )
 

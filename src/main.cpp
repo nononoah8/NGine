@@ -11,6 +11,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "Input.h"
 #include "Shader.h"
 #include "Mesh.h"
 #include "Shapes/Cube.h"
@@ -109,6 +110,8 @@ int main(int argc, char* argv[]) {
     while (running) {
         // Handle events
         while (SDL_PollEvent(&event)) {
+            Input::ProcessEvent(event);
+
             if (event.type == SDL_QUIT) {
                 running = false;
             } else if (event.type == SDL_KEYDOWN) {
@@ -123,20 +126,21 @@ int main(int argc, char* argv[]) {
         }
 
         // Check keyboard state for continuous input
-        const Uint8* keyState = SDL_GetKeyboardState(NULL);
+
+        // Check keyboard state for continuous input
         // Rotation
-        if (keyState[SDL_SCANCODE_A]) rotationY -= rotationSpeed;
-        if (keyState[SDL_SCANCODE_D]) rotationY += rotationSpeed;
-        if (keyState[SDL_SCANCODE_W]) rotationX -= rotationSpeed;
-        if (keyState[SDL_SCANCODE_S]) rotationX += rotationSpeed;
-        
+        Input::GetKey(SDL_SCANCODE_A) ? rotationY -= rotationSpeed : rotationY;
+        Input::GetKey(SDL_SCANCODE_D) ? rotationY += rotationSpeed : rotationY;
+        Input::GetKey(SDL_SCANCODE_W) ? rotationX -= rotationSpeed : rotationX;
+        Input::GetKey(SDL_SCANCODE_S) ? rotationX += rotationSpeed : rotationX;
+
         // Position
-        if (keyState[SDL_SCANCODE_LEFT]) positionX -= moveSpeed;
-        if (keyState[SDL_SCANCODE_RIGHT]) positionX += moveSpeed;
-        if (keyState[SDL_SCANCODE_UP]) positionY += moveSpeed;
-        if (keyState[SDL_SCANCODE_DOWN]) positionY -= moveSpeed;
-        if (keyState[SDL_SCANCODE_Q]) positionZ += moveSpeed;
-        if (keyState[SDL_SCANCODE_E]) positionZ -= moveSpeed;
+        Input::GetKey(SDL_SCANCODE_LEFT) ? positionX -= moveSpeed : positionX;
+        Input::GetKey(SDL_SCANCODE_RIGHT) ? positionX += moveSpeed : positionX;
+        Input::GetKey(SDL_SCANCODE_UP) ? positionY += moveSpeed : positionY;
+        Input::GetKey(SDL_SCANCODE_DOWN) ? positionY -= moveSpeed : positionY;
+        Input::GetKey(SDL_SCANCODE_Q) ? positionZ += moveSpeed : positionZ;
+        Input::GetKey(SDL_SCANCODE_E) ? positionZ -= moveSpeed : positionZ;
 
         // Create combined transformation matrix
         glm::mat4 model = glm::mat4(1.0f);
@@ -161,6 +165,8 @@ int main(int argc, char* argv[]) {
         SDL_GL_SwapWindow(window);
 
         ++iTime;
+
+        Input::LateUpdate();
     }
 
     // Clean up
