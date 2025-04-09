@@ -1,4 +1,4 @@
-#include "Headers/ComponentManager.h"
+#include "ComponentManager.h"
 
 lua_State* ComponentManager::lua_state = nullptr;
 int ComponentManager::num_runtime_components;

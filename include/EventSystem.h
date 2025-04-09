@@ -1,8 +1,8 @@
 #ifndef EVENTSYSTEM_HPP
 #define EVENTSYSTEM_HPP
 
-#include "include/Lua/lua.hpp"
-#include "include/LuaBridge/LuaBridge.h"
+#include "Lua/lua.hpp"
+#include "LuaBridge/LuaBridge.h"
 
 #include <unordered_map>
 #include <vector>

@@ -20,28 +20,33 @@ file(GLOB_RECURSE SRC_FILES
 
 # If LuaBridge has .cpp files that need to be compiled
 file(GLOB_RECURSE LUABRIDGE_SRC_FILES 
-    "${CMAKE_SOURCE_DIR}/include/Lua/*.c"
+    "${CMAKE_SOURCE_DIR}/include/vendor/Lua/*.c"
 )
 
 # Define sources list
 set(SOURCES
     ${SRC_FILES}
     ${LUABRIDGE_SRC_FILES}
-    ${CMAKE_SOURCE_DIR}/include/glad/glad.c
+    ${CMAKE_SOURCE_DIR}/include/vendor/glad/glad.c
+)
+
+include_directories(
+    ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/include/vendor
+    ${CMAKE_SOURCE_DIR}/lib
+    ${CMAKE_SOURCE_DIR}/lib/SDL2
+    ${CMAKE_SOURCE_DIR}/lib/SDL2_Mixer
+    ${CMAKE_SOURCE_DIR}/lib/SDL2_ttf
+)
+link_directories(
+    ${CMAKE_SOURCE_DIR}/lib/glfw
+    ${CMAKE_SOURCE_DIR}/lib/SDL2
+    ${CMAKE_SOURCE_DIR}/lib/SDL2_Mixer
+    ${CMAKE_SOURCE_DIR}/lib/SDL2_ttf
 )
 
 if(APPLE)
     # macOS-specific configuration
-    include_directories(
-        ${CMAKE_SOURCE_DIR}/include
-        ${CMAKE_SOURCE_DIR}/lib
-    )
-    link_directories(
-        ${CMAKE_SOURCE_DIR}/lib/glfw
-        ${CMAKE_SOURCE_DIR}/lib/SDL2
-        ${CMAKE_SOURCE_DIR}/lib/SDL2_Mixer
-        ${CMAKE_SOURCE_DIR}/lib/SDL2_ttf
-    )
 
     add_executable(app ${SOURCES})
 
@@ -73,18 +78,6 @@ if(APPLE)
     target_link_libraries(app ${COCOA_LIBRARY} ${IOKIT_LIBRARY} ${COREVIDEO_LIBRARY} ${COREFOUNDATION_LIBRARY})
 
 elseif(WIN32)
-    # Windows-specific configuration
-    include_directories(
-        ${CMAKE_SOURCE_DIR}/include
-        ${CMAKE_SOURCE_DIR}/lib
-    )
-    link_directories(
-        ${CMAKE_SOURCE_DIR}/lib/glfw
-        ${CMAKE_SOURCE_DIR}/lib/SDL2
-        ${CMAKE_SOURCE_DIR}/lib/SDL2_Mixer
-        ${CMAKE_SOURCE_DIR}/lib/SDL2_ttf
-    )
-
     add_executable(app ${SOURCES})
 
     # Link GLFW

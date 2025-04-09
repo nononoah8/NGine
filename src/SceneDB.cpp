@@ -427,7 +427,6 @@ luabridge::LuaRef Scene::InstantiateActor(const std::string& template_name) {
 
         // Add the components to the actor object
         for (const auto& componentPair : it->second->components) {
-            std::shared_ptr<Component> newComponent = std::make_shared<Component>();
             std::shared_ptr<Component> newComponent = LoadExistingComponent(componentPair.second);
             newActor->components[componentPair.first] = newComponent;
             newComponent->SetComponentProps();

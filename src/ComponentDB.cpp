@@ -90,102 +90,119 @@ void ComponentDB::Init() {
     .endNamespace();
 
     // Add Image manager
-    luabridge::getGlobalNamespace(ComponentManager::lua_state)
-    .beginNamespace("Image")
-    .addFunction("DrawUI", &ImageDB::DrawUI)
-    .addFunction("DrawUIEx", &ImageDB::DrawUIEx)
-    .addFunction("Draw", &ImageDB::Draw)
-    .addFunction("DrawEx", &ImageDB::DrawEx)
-    .addFunction("DrawPixel", &ImageDB::DrawPixel)
-    .endNamespace();
+    // luabridge::getGlobalNamespace(ComponentManager::lua_state)
+    // .beginNamespace("Image")
+    // .addFunction("DrawUI", &ImageDB::DrawUI)
+    // .addFunction("DrawUIEx", &ImageDB::DrawUIEx)
+    // .addFunction("Draw", &ImageDB::Draw)
+    // .addFunction("DrawEx", &ImageDB::DrawEx)
+    // .addFunction("DrawPixel", &ImageDB::DrawPixel)
+    // .endNamespace();
 
-    // Add Camera manager
-    luabridge::getGlobalNamespace(ComponentManager::lua_state)
-    .beginNamespace("Camera")
-    .addFunction("SetPosition", &Renderer::SetCamPos)
-    .addFunction("GetPositionX", &Renderer::GetCamPosX)
-    .addFunction("GetPositionY", &Renderer::GetCamPosY)
-    .addFunction("SetZoom", &Renderer::SetCamZoom)
-    .addFunction("GetZoom", &Renderer::GetZoom)
-    .endNamespace();
+    // // Add Camera manager
+    // luabridge::getGlobalNamespace(ComponentManager::lua_state)
+    // .beginNamespace("Camera")
+    // .addFunction("SetPosition", &Renderer::SetCamPos)
+    // .addFunction("GetPositionX", &Renderer::GetCamPosX)
+    // .addFunction("GetPositionY", &Renderer::GetCamPosY)
+    // .addFunction("SetZoom", &Renderer::SetCamZoom)
+    // .addFunction("GetZoom", &Renderer::GetZoom)
+    // .endNamespace();
 
-    // Add Scene manager
-    luabridge::getGlobalNamespace(ComponentManager::lua_state)
-    .beginNamespace("Scene")
-    .addFunction("Load", &Scene::LoadNewScene)
-    .addFunction("GetCurrent", &Scene::GetCurrent)
-    .addFunction("DontDestroy", &Scene::DontDestroy)
-    .endNamespace();
+    // // Add Scene manager
+    // luabridge::getGlobalNamespace(ComponentManager::lua_state)
+    // .beginNamespace("Scene")
+    // .addFunction("Load", &Scene::LoadNewScene)
+    // .addFunction("GetCurrent", &Scene::GetCurrent)
+    // .addFunction("DontDestroy", &Scene::DontDestroy)
+    // .endNamespace();
     
-    // Add "Vector2" datatype
-    luabridge::getGlobalNamespace(ComponentManager::lua_state)
-    .beginClass<b2Vec2>("Vector2")
-    .addConstructor<void(*) (float, float)>()
-    .addProperty("x", &b2Vec2::x)
-    .addProperty("y", &b2Vec2::y)
-    .addFunction("Normalize", &b2Vec2::Normalize)
-    .addFunction("Length", &b2Vec2::Length)
-    .addFunction("__add", &b2Vec2::operator_add)
-    .addFunction("__sub", &b2Vec2::operator_sub)
-    .addFunction("__mul", &b2Vec2::operator_mult)
-    .addStaticFunction("Distance", &b2Vec2::Distance)
-    .addStaticFunction("Dot", &b2Vec2::Dot)
-    .endClass();
+    // // Add "Vector2" datatype
+    // luabridge::getGlobalNamespace(ComponentManager::lua_state)
+    // .beginClass<b2Vec2>("Vector2")
+    // .addConstructor<void(*) (float, float)>()
+    // .addProperty("x", &b2Vec2::x)
+    // .addProperty("y", &b2Vec2::y)
+    // .addFunction("Normalize", &b2Vec2::Normalize)
+    // .addFunction("Length", &b2Vec2::Length)
+    // .addFunction("__add", &b2Vec2::operator_add)
+    // .addFunction("__sub", &b2Vec2::operator_sub)
+    // .addFunction("__mul", &b2Vec2::operator_mult)
+    // .addStaticFunction("Distance", &b2Vec2::Distance)
+    // .addStaticFunction("Dot", &b2Vec2::Dot)
+    // .endClass();
 
-    // Add Rigidbody
-    luabridge::getGlobalNamespace(ComponentManager::lua_state)
-    .beginClass<Rigidbody>("Rigidbody")
-    .addProperty("x", &Rigidbody::x)
-    .addProperty("y", &Rigidbody::y)
-    .addProperty("body_type", &Rigidbody::body_type)
-    .addProperty("precise", &Rigidbody::precise)
-    .addProperty("gravity_scale", &Rigidbody::gravity_scale)
-    .addProperty("density", &Rigidbody::density)
-    .addProperty("angular_friction", &Rigidbody::angular_friction)
-    .addProperty("rotation", &Rigidbody::rotation)
-    .addProperty("has_collider", &Rigidbody::has_collider)
-    .addProperty("has_trigger", &Rigidbody::has_trigger)
-    .addProperty("key", &Rigidbody::key)
-    .addProperty("type", &Rigidbody::type)
-    .addFunction("GetPosition", &Rigidbody::GetPosition)
-    .addFunction("GetRotation", &Rigidbody::GetRotation)
-    .addFunction("AddForce", &Rigidbody::AddForce)
-    .addFunction("SetVelocity", &Rigidbody::SetVelocity)
-    .addFunction("SetPosition", &Rigidbody::SetPosition)
-    .addFunction("SetRotation", &Rigidbody::SetRotation)
-    .addFunction("SetAngularVelocity", &Rigidbody::SetAngularVelocity)
-    .addFunction("SetGravityScale", &Rigidbody::SetGravityScale)
-    .addFunction("SetUpDirection", &Rigidbody::SetUpDirection)
-    .addFunction("SetRightDirection", &Rigidbody::SetRightDirection)
-    .addFunction("GetVelocity", &Rigidbody::GetVelocity)
-    .addFunction("GetAngularVelocity", &Rigidbody::GetAngularVelocity)
-    .addFunction("GetGravityScale", &Rigidbody::GetGravityScale)
-    .addFunction("GetUpDirection", &Rigidbody::GetUpDirection)
-    .addFunction("GetRightDirection", &Rigidbody::GetRightDirection)
-    .endClass();
+    // // Add Rigidbody
+    // luabridge::getGlobalNamespace(ComponentManager::lua_state)
+    // .beginClass<Rigidbody>("Rigidbody")
+    // .addProperty("x", &Rigidbody::x)
+    // .addProperty("y", &Rigidbody::y)
+    // .addProperty("body_type", &Rigidbody::body_type)
+    // .addProperty("precise", &Rigidbody::precise)
+    // .addProperty("gravity_scale", &Rigidbody::gravity_scale)
+    // .addProperty("density", &Rigidbody::density)
+    // .addProperty("angular_friction", &Rigidbody::angular_friction)
+    // .addProperty("rotation", &Rigidbody::rotation)
+    // .addProperty("has_collider", &Rigidbody::has_collider)
+    // .addProperty("has_trigger", &Rigidbody::has_trigger)
+    // .addProperty("key", &Rigidbody::key)
+    // .addProperty("type", &Rigidbody::type)
+    // .addFunction("GetPosition", &Rigidbody::GetPosition)
+    // .addFunction("GetRotation", &Rigidbody::GetRotation)
+    // .addFunction("AddForce", &Rigidbody::AddForce)
+    // .addFunction("SetVelocity", &Rigidbody::SetVelocity)
+    // .addFunction("SetPosition", &Rigidbody::SetPosition)
+    // .addFunction("SetRotation", &Rigidbody::SetRotation)
+    // .addFunction("SetAngularVelocity", &Rigidbody::SetAngularVelocity)
+    // .addFunction("SetGravityScale", &Rigidbody::SetGravityScale)
+    // .addFunction("SetUpDirection", &Rigidbody::SetUpDirection)
+    // .addFunction("SetRightDirection", &Rigidbody::SetRightDirection)
+    // .addFunction("GetVelocity", &Rigidbody::GetVelocity)
+    // .addFunction("GetAngularVelocity", &Rigidbody::GetAngularVelocity)
+    // .addFunction("GetGravityScale", &Rigidbody::GetGravityScale)
+    // .addFunction("GetUpDirection", &Rigidbody::GetUpDirection)
+    // .addFunction("GetRightDirection", &Rigidbody::GetRightDirection)
+    // .endClass();
     
-    luabridge::getGlobalNamespace(ComponentManager::lua_state)
-    .beginClass<Collision>("Collision")
-    .addProperty("other", &Collision::other)
-    .addProperty("point", &Collision::point)
-    .addProperty("relative_velocity", &Collision::relative_velocity)
-    .addProperty("normal", &Collision::normal)
-    .endClass();
+    // luabridge::getGlobalNamespace(ComponentManager::lua_state)
+    // .beginClass<Collision>("Collision")
+    // .addProperty("other", &Collision::other)
+    // .addProperty("point", &Collision::point)
+    // .addProperty("relative_velocity", &Collision::relative_velocity)
+    // .addProperty("normal", &Collision::normal)
+    // .endClass();
 
     
-    luabridge::getGlobalNamespace(ComponentManager::lua_state)
-    .beginNamespace("Physics")
-    .addFunction("Raycast", &RaycastCallback::Raycast)
-    .addFunction("RaycastAll", &RaycastCallback::RaycastAll)
-    .endNamespace();
+    // luabridge::getGlobalNamespace(ComponentManager::lua_state)
+    // .beginNamespace("Physics")
+    // .addFunction("Raycast", &RaycastCallback::Raycast)
+    // .addFunction("RaycastAll", &RaycastCallback::RaycastAll)
+    // .endNamespace();
 
-    luabridge::getGlobalNamespace(ComponentManager::lua_state)
-    .beginClass<HitResult>("HitResult")
-    .addProperty("actor", &HitResult::actor)
-    .addProperty("point", &HitResult::point)
-    .addProperty("is_trigger", &HitResult::is_trigger)
-    .addProperty("normal", &HitResult::normal)
-    .endClass();
+    // luabridge::getGlobalNamespace(ComponentManager::lua_state)
+    // .beginClass<HitResult>("HitResult")
+    // .addProperty("actor", &HitResult::actor)
+    // .addProperty("point", &HitResult::point)
+    // .addProperty("is_trigger", &HitResult::is_trigger)
+    // .addProperty("normal", &HitResult::normal)
+    // .endClass();
+
+    // luabridge::getGlobalNamespace(ComponentManager::lua_state)
+    // .beginClass<ParticleSystem>("ParticleSystem")
+    // .addProperty("x", &ParticleSystem::x)
+    // .addProperty("y", &ParticleSystem::y)
+    // .addProperty("start_color_r", &ParticleSystem::start_color_r)
+    // .addProperty("start_color_g", &ParticleSystem::start_color_g)
+    // .addProperty("start_color_b", &ParticleSystem::start_color_b)
+    // .addProperty("start_color_a", &ParticleSystem::start_color_a)
+    // .addProperty("enabled", &ParticleSystem::getEnabled, &ParticleSystem::setEnabled)
+    // .addProperty("frames_between_bursts", &ParticleSystem::frames_between_bursts)
+    // .addProperty("burst_quantity", &ParticleSystem::burst_quantity)
+    // .addProperty("duration_frames", &ParticleSystem::duration_frames)
+    // .addFunction("Stop", &ParticleSystem::Stop)
+    // .addFunction("Play", &ParticleSystem::Play)
+    // .addFunction("Burst", &ParticleSystem::Burst)
+    // .endClass();
 
     luabridge::getGlobalNamespace(ComponentManager::lua_state)
     .beginNamespace("Event")
@@ -193,23 +210,6 @@ void ComponentDB::Init() {
     .addFunction("Subscribe", &EventSystem::Subscribe)
     .addFunction("Unsubscribe", &EventSystem::Unsubscribe)
     .endNamespace();
-
-    luabridge::getGlobalNamespace(ComponentManager::lua_state)
-    .beginClass<ParticleSystem>("ParticleSystem")
-    .addProperty("x", &ParticleSystem::x)
-    .addProperty("y", &ParticleSystem::y)
-    .addProperty("start_color_r", &ParticleSystem::start_color_r)
-    .addProperty("start_color_g", &ParticleSystem::start_color_g)
-    .addProperty("start_color_b", &ParticleSystem::start_color_b)
-    .addProperty("start_color_a", &ParticleSystem::start_color_a)
-    .addProperty("enabled", &ParticleSystem::getEnabled, &ParticleSystem::setEnabled)
-    .addProperty("frames_between_bursts", &ParticleSystem::frames_between_bursts)
-    .addProperty("burst_quantity", &ParticleSystem::burst_quantity)
-    .addProperty("duration_frames", &ParticleSystem::duration_frames)
-    .addFunction("Stop", &ParticleSystem::Stop)
-    .addFunction("Play", &ParticleSystem::Play)
-    .addFunction("Burst", &ParticleSystem::Burst)
-    .endClass();
 }
 
 std::shared_ptr<Component> ComponentDB::AddComponent(std::string component_name) {

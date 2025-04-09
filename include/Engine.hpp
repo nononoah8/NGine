@@ -21,6 +21,7 @@
 #include "TextDB.h"
 #include "AudioDB.h"
 
+#include "glm/glm.hpp"
 #include "Lua/lua.hpp"
 
 // Grouping structs
