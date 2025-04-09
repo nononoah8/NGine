@@ -16,162 +16,27 @@
 #include "Mesh.h"
 #include "Shapes/Cube.h"
 #include "Shapes/Sphere.h"
+#include "Renderer.h"
+
+#include "Engine.hpp"
 
 
 int main(int argc, char* argv[]) {
-    // Initialize SDL
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0) {
-        std::cerr << "Failed to initialize SDL: " << SDL_GetError() << std::endl;
-        return -1;
-    }
-
-    // Set SDL to use OpenGL
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-
-    // Create an SDL window
-    int width = 800;
-    int height = 600;
-    SDL_Window* window = SDL_CreateWindow(
-        "SDL + OpenGL", 
-        SDL_WINDOWPOS_CENTERED, 
-        SDL_WINDOWPOS_CENTERED, 
-        width, 
-        height, 
-        SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE
-    );
-
-    if (!window) {
-        std::cerr << "Failed to create SDL window: " << SDL_GetError() << std::endl;
-        SDL_Quit();
-        return -1;
-    }
-
-    // Create an OpenGL context
-    SDL_GLContext glContext = SDL_GL_CreateContext(window);
-    if (!glContext) {
-        std::cerr << "Failed to create OpenGL context: " << SDL_GetError() << std::endl;
-        SDL_DestroyWindow(window);
-        SDL_Quit();
-        return -1;
-    }
-
-    // Initialize GLAD
-    if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)) {
-        std::cerr << "Failed to initialize GLAD" << std::endl;
-        SDL_GL_DeleteContext(glContext);
-        SDL_DestroyWindow(window);
-        SDL_Quit();
-        return -1;
-    }
-
-    // Create Shader program
-    Shader shaderProgram("shaders/vertex/triangle.vert", "shaders/fragment/triangle.frag");
-    if (!shaderProgram.GetID()) {
-        std::cerr << "Failed to create shader program" << std::endl;
-        SDL_GL_DeleteContext(glContext);
-        SDL_DestroyWindow(window);
-        SDL_Quit();
-        return -1;
-    }
-
-    // Get the location of the uniforms
-    GLuint programID = shaderProgram.GetID();
-    GLint iTimeLocation = glGetUniformLocation(programID, "iTime");
-    GLint iResolutionLocation = glGetUniformLocation(programID, "iResolution");
-    GLint modelLoc = glGetUniformLocation(programID, "model");
-    
-    if (iTimeLocation == -1 || iResolutionLocation == -1 || modelLoc == -1) {
-        std::cerr << "ERROR::SHADER::UNIFORM::NOT_FOUND" << std::endl;
-    }
-    int iTime = 0;
+    Engine engine = Engine();
 
     // Create a cube
-    std::unique_ptr<Mesh> sphere = Shape::Sphere::Create(1.0f);
+    std::unique_ptr<Mesh> cube = Shape::Cube::Create();
 
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     // Enable depth testing
     glEnable(GL_DEPTH_TEST);
 
-    // At the top of main(), add or modify these variables
-    float rotationX = 0.0f;
-    float rotationY = 0.0f;
-    float rotationSpeed = 0.002f;  // Reduce this value to make rotation slower
-    float positionX = 0.0f;
-    float positionY = 0.0f;
-    float positionZ = 0.0f;
-    float moveSpeed = 0.001f;
-
     // Main render loop
-    bool running = true;
-    SDL_Event event;
-    while (running) {
-        // Handle events
-        while (SDL_PollEvent(&event)) {
-            Input::ProcessEvent(event);
-
-            if (event.type == SDL_QUIT) {
-                running = false;
-            } else if (event.type == SDL_KEYDOWN) {
-                if (event.key.keysym.sym == SDLK_ESCAPE) {
-                    running = false;
-                }
-            } else if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_RESIZED) {
-                width = event.window.data1;
-                height = event.window.data2;
-                glViewport(0, 0, width, height);
-            }
-        }
-
-        // Check keyboard state for continuous input
-
-        // Check keyboard state for continuous input
-        // Rotation
-        Input::GetKey(SDL_SCANCODE_A) ? rotationY -= rotationSpeed : rotationY;
-        Input::GetKey(SDL_SCANCODE_D) ? rotationY += rotationSpeed : rotationY;
-        Input::GetKey(SDL_SCANCODE_W) ? rotationX -= rotationSpeed : rotationX;
-        Input::GetKey(SDL_SCANCODE_S) ? rotationX += rotationSpeed : rotationX;
-
-        // Position
-        Input::GetKey(SDL_SCANCODE_LEFT) ? positionX -= moveSpeed : positionX;
-        Input::GetKey(SDL_SCANCODE_RIGHT) ? positionX += moveSpeed : positionX;
-        Input::GetKey(SDL_SCANCODE_UP) ? positionY += moveSpeed : positionY;
-        Input::GetKey(SDL_SCANCODE_DOWN) ? positionY -= moveSpeed : positionY;
-        Input::GetKey(SDL_SCANCODE_Q) ? positionZ += moveSpeed : positionZ;
-        Input::GetKey(SDL_SCANCODE_E) ? positionZ -= moveSpeed : positionZ;
-
-        // Create combined transformation matrix
-        glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(positionX, positionY, positionZ));
-        model = glm::rotate(model, rotationX, glm::vec3(1.0f, 0.0f, 0.0f));
-        model = glm::rotate(model, rotationY, glm::vec3(0.0f, 1.0f, 0.0f));
-
-        // Clear the screen
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        // Use shader program and set uniforms
-        shaderProgram.Use();
-        glUniform1i(iTimeLocation, iTime);
-        glUniform2f(iResolutionLocation, (float)width, (float)height);
-        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-
-        // Draw the cube
-        sphere->Draw();
-
-        // Swap buffers
-        SDL_GL_SwapWindow(window);
-
-        ++iTime;
-
-        Input::LateUpdate();
-    }
+    engine.GameLoop();
 
     // Clean up
-    SDL_GL_DeleteContext(glContext);
-    SDL_DestroyWindow(window);
+    // SDL_DestroyWindow(window);
     SDL_Quit();
 
     return 0;

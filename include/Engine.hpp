@@ -20,12 +20,15 @@
 #include "TemplateDB.hpp"
 #include "TextDB.h"
 #include "AudioDB.h"
+#include "Shader.h"
 
 #include "glm/glm.hpp"
 #include "Lua/lua.hpp"
 
-// Grouping structs
+#include <glad/glad.h>
+#include <SDL2/SDL.h>
 
+// Groupinstructs
 struct RenderingSettings {
     glm::ivec2 cameraSize;
     glm::vec2 cameraPos = glm::vec2(0, 0);
@@ -33,7 +36,6 @@ struct RenderingSettings {
     int colorG = 255;
     int colorB = 255;
     float zoomFactor=1.0f;
-    float easeFactor=1.0f;
 };
 
 // Engine Class: runs the game engine
@@ -47,17 +49,27 @@ public:
     // Game loop functions
     void UpdateGame();
 
+    void SetupShaderUniforms();
+
     bool are_intro_images = false;
     bool are_intro_text = false;
     bool is_player_actor=false;
 
     Scene current_scene;
+    
 private:
     std::string game_title;
-
+    
     RenderingSettings renderingSettings;
-
+    
     lua_State* lua_state = nullptr;
+    
+    std::shared_ptr<Shader> shaderProgram = nullptr;
+    
+    // Shader uniform locations
+    GLint modelLoc;
+    GLint viewLoc;
+    GLint projectionLoc;
 };
 
 #endif

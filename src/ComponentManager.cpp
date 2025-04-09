@@ -7,8 +7,6 @@ int ComponentManager::num_runtime_components;
 void ComponentManager::Initialize() {
   InitializeState();
   num_runtime_components = 0;
-  // InitializeFunctions();
-  // InitializeComponents();
 }
 
 void ComponentManager::InitializeState() {

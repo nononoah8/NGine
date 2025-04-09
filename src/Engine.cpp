@@ -10,6 +10,8 @@
 #include "ComponentManager.h"
 #include "ComponentDB.hpp"
 #include "EventSystem.h"
+#include "Renderer.h"
+#include "Shader.h"
 
 // Engine initialization.
 Engine::Engine() {
@@ -26,7 +28,15 @@ Engine::Engine() {
     ComponentManager::Initialize();
     ComponentDB::Init();
 
-    // Initialize the physics world
+    // Create Shader program
+    shaderProgram = std::make_shared<Shader>("shaders/vertex/vertex.glsl", "shaders/fragment/fragment.glsl");
+    if (!shaderProgram->GetID()) {
+        std::cerr << "Failed to create shader program" << std::endl;
+        // SDL_GL_DeleteContext(glContext);
+        SDL_DestroyWindow(Renderer::window);
+        SDL_Quit();
+        exit(1);
+    }
 
     SetupInitialProps();
 }
@@ -35,6 +45,20 @@ Engine::Engine() {
 // Will run until SDL receivs a quit command.
 void Engine::GameLoop() {
     bool running = true;
+    
+    // Create camera matrices once (or update when camera changes)
+    glm::mat4 view = glm::lookAt(
+        glm::vec3(0.0f, 0.0f, 3.0f), // Camera position
+        glm::vec3(0.0f, 0.0f, 0.0f), // Look target
+        glm::vec3(0.0f, 1.0f, 0.0f)  // Up vector
+    );
+    
+    glm::mat4 projection = glm::perspective(
+        glm::radians(45.0f),
+        (float)renderingSettings.cameraSize.x / (float)renderingSettings.cameraSize.y,
+        0.1f, 
+        100.0f
+    );
 
     while (running) {
         if (Scene::load_new_scene) {
@@ -44,18 +68,29 @@ void Engine::GameLoop() {
             Scene::load_new_scene = false;
         }
 
-        // running = Renderer::Update();
+        // Process events
+        running = Renderer::Update();
 
-        // SDL_SetRenderDrawColor(Renderer::renderer, renderingSettings.colorR, renderingSettings.colorG, renderingSettings.colorB, 255);
-        // SDL_RenderClear(Renderer::renderer);
+        // Clear screen for renderer
+        Renderer::ClearScreen();
 
-        UpdateGame();
+        shaderProgram->Use();
+
+        // Set view and projection (camera) uniforms
+        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+        // UpdateGame();
+
+
+        // Render 3d scene objects
+
 
         // Render all of the queued stuff
         // ImageDB::RenderAndClearImages();
 
         // Render all of the queued text
-        TextDB::RenderText();
+        // TextDB::RenderText();
 
         // Render all of the queued pixels
         // ImageDB::RenderAndClearPixels();
@@ -63,7 +98,8 @@ void Engine::GameLoop() {
         // Process pending event subscriptions
         EventSystem::ProcessPendingChanges();
         
-        // Helper::SDL_RenderPresent(Renderer::renderer);
+        // Swap buffers at the end
+        Renderer::SwapBuffers();
 
         Input::LateUpdate();
     }
@@ -99,21 +135,21 @@ void Engine::SetupInitialProps() {
         renderingSettings.colorG = getJsonIntOrDefault(doc, "clear_color_g", 255);
         renderingSettings.colorB = getJsonIntOrDefault(doc, "clear_color_b", 255);
         renderingSettings.zoomFactor = getJsonFloatOrDefault(doc, "zoom_factor", 1.0f);
-        renderingSettings.easeFactor = getJsonFloatOrDefault(doc, "cam_ease_factor", 1.0f);
     }else{
         renderingSettings.cameraSize.x = 640;
         renderingSettings.cameraSize.y = 360;
     }
 
-    // Renderer::LoadRenderer(renderingSettings.cameraSize.x, renderingSettings.cameraSize.y, renderingSettings.colorR, renderingSettings.colorG, renderingSettings.colorB, renderingSettings.cameraSize, renderingSettings.zoomFactor, renderingSettings.cameraPos);
-    // Renderer::RenderWindow(game_title);
+    Renderer::LoadRenderer(renderingSettings.cameraSize.x, renderingSettings.cameraSize.y, renderingSettings.colorR, renderingSettings.colorG, renderingSettings.colorB, renderingSettings.cameraSize, renderingSettings.zoomFactor, renderingSettings.cameraPos);
+    Renderer::RenderWindow(game_title);
 
-    current_scene = Scene();
-    current_scene.LoadScene(initial_scene);
+    //TODO: Make sure scene loading and everything works properly.
+    // current_scene = Scene();
+    // current_scene.LoadScene(initial_scene);
     
     // TextDB::Init(Renderer::renderer);
-    Input::Init();
-    AudioDB::Init();
+    // Input::Init();
+    // AudioDB::Init();
 }
 
 
@@ -121,3 +157,32 @@ void Engine::UpdateGame() {
     current_scene.Update();
 }
 
+// In Engine.cpp, at the end of the Engine constructor or in a separate method
+void Engine::SetupShaderUniforms() {
+    // Make sure the shader is valid
+    if (!shaderProgram || !shaderProgram->GetID()) {
+        std::cerr << "Cannot setup uniforms: Invalid shader program" << std::endl;
+        return;
+    }
+    
+    // Get shader program ID
+    GLuint programID = shaderProgram->GetID();
+    
+    // Store uniform locations
+    modelLoc = glGetUniformLocation(programID, "model");
+    viewLoc = glGetUniformLocation(programID, "view");
+    projectionLoc = glGetUniformLocation(programID, "projection");
+    
+    // Add error checking if needed
+    if (modelLoc == -1) {
+        std::cerr << "Warning: Uniform 'model' not found in shader" << std::endl;
+    }
+
+    if (viewLoc == -1) {
+        std::cerr << "Warning: Uniform 'view' not found in shader" << std::endl;
+    }
+
+    if (projectionLoc == -1) {
+        std::cerr << "Warning: Uniform 'projection' not found in shader" << std::endl;
+    }
+}

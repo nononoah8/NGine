@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 project(main)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Wall -fdiagnostics-color=always")
 
 # Set Debug as default build type if not specified
@@ -118,7 +118,3 @@ elseif(WIN32)
         )
     endforeach()
 endif()
-
-# Print some debugging information
-message(STATUS "Source files: ${SOURCES}")
-message(STATUS "Output directory: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}")
