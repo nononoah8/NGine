@@ -1,3 +1,0 @@
-C:/Users/noahd/Documents/EECS/EECS498-007/3d_test/CMakeFiles/app.dir
-C:/Users/noahd/Documents/EECS/EECS498-007/3d_test/CMakeFiles/ALL_BUILD.dir
-C:/Users/noahd/Documents/EECS/EECS498-007/3d_test/CMakeFiles/ZERO_CHECK.dir

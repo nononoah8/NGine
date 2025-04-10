@@ -1,0 +1,12 @@
+{
+  "actors": [
+    {
+      "name": "cube",
+      "components": {
+        "1": {
+          "type": "cube"
+        }
+      }
+    }
+  ]
+}

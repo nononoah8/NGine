@@ -16,7 +16,7 @@ public:
     }
     static int GetFrame() {
         // TODO: Implement frame counting logic
-        return 1;
+        return frameNumber;
     }
     static void OpenUrl(const std::string& url) {
         #ifdef _WIN32
@@ -29,6 +29,8 @@ public:
 
         std::system(command.c_str());
     }
+
+    static int frameNumber;
 };
 
 #endif

@@ -11,10 +11,17 @@
 #include "EventSystem.h"
 #include "Renderer.h"
 
+#include "GameObjectDB.h"
+#include "GameObject.h"
+
 #include <filesystem>
 #include <string>
 
 std::unordered_map<std::string, std::shared_ptr<Component>> ComponentDB::components;
+
+static glm::vec3 vec3_add(const glm::vec3& v1, const glm::vec3& v2) { return v1 + v2; }
+static glm::vec3 vec3_sub(const glm::vec3& v1, const glm::vec3& v2) { return v1 - v2; }
+static glm::vec3 vec3_mul(const glm::vec3& v, float scalar) { return v * scalar; }
 
 void ComponentDB::Init() {
     // Added debug statements - Debug.Log / Debug.Error
@@ -122,6 +129,26 @@ void ComponentDB::Init() {
     .addProperty("x", &glm::vec3::x)
     .addProperty("y", &glm::vec3::y)
     .addProperty("z", &glm::vec3::z)
+    .endClass();
+
+    luabridge::getGlobalNamespace(ComponentManager::lua_state)
+    .beginNamespace("Shape")
+    .addFunction("DrawCube", &GameObjectDB::CreateCube)
+    .addFunction("DrawSphere", &GameObjectDB::CreateSphere)
+    .endNamespace();
+
+    // luabridge::getGlobalNamespace(ComponentManager::lua_state)
+    // .beginClass<GameObject>("GameObject")
+    // .addProperty("position", &GameObject::position)
+    // .addProperty("rotation", &GameObject::rotation)
+    // .addProperty("scale", &GameObject::scale)
+    // .endClass();
+
+    luabridge::getGlobalNamespace(ComponentManager::lua_state)
+    .beginClass<std::shared_ptr<GameObject>>("GameObjectPtr")
+    // .addFunction("GetPosition", &GetGameObjectPosition)
+    // .addFunction("SetPosition", &SetGameObjectPosition)
+    // .addFunction("SetPositionXYZ", &SetGameObjectPositionXYZ)
     .endClass();
 
     // // Add "Vector2" datatype

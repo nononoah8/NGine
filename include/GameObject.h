@@ -35,8 +35,11 @@ public:
   static std::shared_ptr<GameObject> CreateCube(float size = 1.0f);
   static std::shared_ptr<GameObject> CreateSphere(float radius = 1.0f, glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f), int segments = 16);
   static std::shared_ptr<GameObject> LoadModel(const std::string& path);
+
+  void SetPosition(glm::vec3 pos) { position = pos; }
+  void SetPosition(float x, float y, float z) { position = glm::vec3(x, y, z); }
+  glm::vec3 GetPosition() { return position; }
 private:
 };
-
 
 #endif // GAMEOBJECT_H

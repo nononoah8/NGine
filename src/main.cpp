@@ -39,8 +39,8 @@ int main(int argc, char* argv[]) {
 /*
 Next steps:
 * Need to have a light and camera manager, and make a renderer manager.
-* Also have a transform class
-* Implement the input manager, scene manager, and engine manager, and others.
+* Add some way to use textures on the shapes
+* Add a plane shape, and triangle shape too, add some 2d shapes
 * Can use https://github.com/assimp/assimp - assimp for asset importing for models and whatnot.
 * Add physics engine - https://github.com/jrouwe/JoltPhysics, https://github.com/NVIDIA-Omniverse/PhysX, https://github.com/bulletphysics/bullet3, etc.
 * Entity-Component system

@@ -20,6 +20,10 @@
 #include "GameObjectDB.h"
 #include "GameObject.h"
 
+#include "Application.hpp"
+
+int Application::frameNumber = 0;
+
 bool DEBUG = false;
 
 // Engine initialization.
@@ -32,6 +36,8 @@ Engine::Engine() {
         std::cout << "error: resources/game.config missing";
         std::exit(0);
     }
+
+    Application::frameNumber = 0;
 
     // Start and initialize the lua shi
     ComponentManager::Initialize();
@@ -63,14 +69,13 @@ void Engine::GameLoop() {
     } else {
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
-
-    // Create camera matrices once (or update when camera changes)
+    
     glm::mat4 view = glm::lookAt(
-        glm::vec3(0.0f, 0.0f, 3.0f), // Camera position
+        Renderer::GetCamPos(),       // Camera Location
         glm::vec3(0.0f, 0.0f, 0.0f), // Look target
         glm::vec3(0.0f, 1.0f, 0.0f)  // Up vector
     );
-    
+
     glm::mat4 projection = glm::perspective(
         glm::radians(45.0f),
         (float)renderingSettings.cameraSize.x / (float)renderingSettings.cameraSize.y,
@@ -107,8 +112,7 @@ void Engine::GameLoop() {
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
         glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
-        // UpdateGame();
-
+        UpdateGame();
 
         GameObjectDB::UpdateAll(deltaTime);
 
@@ -132,6 +136,8 @@ void Engine::GameLoop() {
         Renderer::SwapBuffers();
 
         Input::LateUpdate();
+
+        ++Application::frameNumber;
     }
 
     TextDB::Shutdown();
@@ -176,8 +182,8 @@ void Engine::SetupInitialProps() {
     Renderer::RenderWindow(game_title);
 
     //TODO: Make sure scene loading and everything works properly.
-    // current_scene = Scene();
-    // current_scene.LoadScene(initial_scene);
+    current_scene = Scene();
+    current_scene.LoadScene(initial_scene);
     
     // TextDB::Init(Renderer::renderer);
     // Input::Init();

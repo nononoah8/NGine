@@ -56,7 +56,7 @@ public:
     bool are_intro_text = false;
     bool is_player_actor=false;
 
-    Scene current_scene;   
+    Scene current_scene;
 private:
     std::string game_title;
     

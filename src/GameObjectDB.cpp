@@ -50,7 +50,6 @@ std::shared_ptr<GameObject> GameObjectDB::LoadModel(const std::string& path, con
 }
 
 void GameObjectDB::RenderAndClearObjects(GLuint shaderProgram, GLint modelLoc) {
-  std::cout << "rendering stuff!" << std::endl;
 
   // Enable depth testing for proper 3D rendering
   glEnable(GL_DEPTH_TEST);
@@ -62,6 +61,7 @@ void GameObjectDB::RenderAndClearObjects(GLuint shaderProgram, GLint modelLoc) {
   
   // Clear the queue after rendering
   renderQueue.clear();
+  allGameObjects.clear();
 }
 
 void GameObjectDB::UpdateAll(float deltaTime) {
