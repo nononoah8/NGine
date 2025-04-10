@@ -28,10 +28,11 @@ public:
     // Camera API
     static float GetZoom();
     static glm::vec2 GetCamSize();
-    static glm::vec2 GetCamPos();
-    static void SetCamPos(float x, float y);
+    static glm::vec3 GetCamPos();
+    static void SetCamPos(float x, float y, float z);
     static float GetCamPosX();
     static float GetCamPosY();
+    static float GetCamPosZ();
     static void SetCamZoom(float z);
     static float GetCamZoom();
 
@@ -45,7 +46,7 @@ public:
     static int y_resolution;
 private:
     static glm::vec2 camera_size;
-    static glm::vec2 camera_pos;
+    static glm::vec3 camera_pos;
     static float zoom;
     static float clear_color_r;
     static float clear_color_g;

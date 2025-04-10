@@ -21,7 +21,7 @@ public:
   glm::vec3 rotation;  // In radians
   glm::vec3 scale;
   glm::vec3 color;
-  bool isActive;
+  bool isActive = true;
   std::shared_ptr<Mesh> mesh;
 
   // Core methods

@@ -20,7 +20,7 @@ float Renderer::clear_color_g = 1.0f;
 float Renderer::clear_color_b = 1.0f;
 
 glm::vec2 Renderer::camera_size;
-glm::vec2 Renderer::camera_pos;
+glm::vec3 Renderer::camera_pos;
 float Renderer::zoom;
 
 SDL_GLContext Renderer::glContext = nullptr;
@@ -47,7 +47,7 @@ void Renderer::LoadRenderer(int x_res, int y_res, int r, int g, int b, glm::vec2
     clear_color_b = b / 255.0f;
 
     camera_size = cam_size;
-    camera_pos = cam_pos;
+    camera_pos = glm::vec3(cam_pos, 1.0f);
     zoom = z;
 }
 
@@ -127,14 +127,15 @@ glm::vec2 Renderer::GetCamSize() {
     return camera_size;
 }
 
-glm::vec2 Renderer::GetCamPos() {
+glm::vec3 Renderer::GetCamPos() {
     return camera_pos;
 }
 
 
-void Renderer::SetCamPos(float x, float y) {
+void Renderer::SetCamPos(float x, float y, float z) {
     camera_pos.x = x;
     camera_pos.y = y;
+    camera_pos.z = z;
 }
 
 float Renderer::GetCamPosX() {
@@ -143,6 +144,10 @@ float Renderer::GetCamPosX() {
 
 float Renderer::GetCamPosY() {
     return camera_pos.y;
+}
+
+float Renderer::GetCamPosZ() {
+    return camera_pos.z;
 }
 
 void Renderer::SetCamZoom(float z) {

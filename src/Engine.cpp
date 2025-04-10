@@ -17,6 +17,7 @@
 #include "Mesh.h"
 #include "Shapes/Cube.h"
 #include "Shapes/Sphere.h"
+#include "GameObjectDB.h"
 #include "GameObject.h"
 
 bool DEBUG = false;
@@ -77,7 +78,15 @@ void Engine::GameLoop() {
         100.0f
     );
 
+    float lastFrameTime = 0.0f;
+    float deltaTime = 0.0f;
+    
     while (running) {
+        // Calculate delta time
+        float currentTime = static_cast<float>(SDL_GetTicks()) / 1000.0f;
+        deltaTime = currentTime - lastFrameTime;
+        lastFrameTime = currentTime;
+
         // Process input events
         if (Scene::load_new_scene) {
             current_scene.~Scene();
@@ -101,8 +110,11 @@ void Engine::GameLoop() {
         // UpdateGame();
 
 
-        // Render 3d scene objects
+        GameObjectDB::UpdateAll(deltaTime);
 
+
+        // Render 3d scene objects
+        GameObjectDB::RenderAndClearObjects(shaderProgram->GetID(), modelLoc);
 
         // Render all of the queued stuff
         // ImageDB::RenderAndClearImages();

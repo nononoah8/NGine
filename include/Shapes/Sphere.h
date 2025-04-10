@@ -1,10 +1,16 @@
 #ifndef SPHERE_H
 #define SPHERE_H
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
+
+
 #include "Mesh.h"
+#include <cmath>
 #include <vector>
 #include <memory>
-#include <cmath>
 #include <glm/glm.hpp>
 
 namespace Shape {
