@@ -24,11 +24,6 @@
 int main(int argc, char* argv[]) {
     Engine engine = Engine();
 
-    // Create a cube
-    std::unique_ptr<Mesh> cube = Shape::Cube::Create();
-
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
     // Enable depth testing
     glEnable(GL_DEPTH_TEST);
 
@@ -36,7 +31,6 @@ int main(int argc, char* argv[]) {
     engine.GameLoop();
 
     // Clean up
-    // SDL_DestroyWindow(window);
     SDL_Quit();
 
     return 0;

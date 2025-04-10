@@ -10,8 +10,16 @@
 #include "ComponentManager.h"
 #include "ComponentDB.hpp"
 #include "EventSystem.h"
+
 #include "Renderer.h"
 #include "Shader.h"
+
+#include "Mesh.h"
+#include "Shapes/Cube.h"
+#include "Shapes/Sphere.h"
+#include "GameObject.h"
+
+bool DEBUG = false;
 
 // Engine initialization.
 Engine::Engine() {
@@ -28,17 +36,19 @@ Engine::Engine() {
     ComponentManager::Initialize();
     ComponentDB::Init();
 
+    SetupInitialProps();
+
     // Create Shader program
     shaderProgram = std::make_shared<Shader>("shaders/vertex/vertex.glsl", "shaders/fragment/fragment.glsl");
+    std::cout << "made shader program" << std::endl;
     if (!shaderProgram->GetID()) {
-        std::cerr << "Failed to create shader program" << std::endl;
         // SDL_GL_DeleteContext(glContext);
         SDL_DestroyWindow(Renderer::window);
         SDL_Quit();
         exit(1);
     }
 
-    SetupInitialProps();
+    SetupShaderUniforms();
 }
 
 // Engine's gameloop.
@@ -46,6 +56,13 @@ Engine::Engine() {
 void Engine::GameLoop() {
     bool running = true;
     
+    // Set to wireframe mode if debug flag is true
+    if(DEBUG) {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    } else {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    }
+
     // Create camera matrices once (or update when camera changes)
     glm::mat4 view = glm::lookAt(
         glm::vec3(0.0f, 0.0f, 3.0f), // Camera position
@@ -61,6 +78,7 @@ void Engine::GameLoop() {
     );
 
     while (running) {
+        // Process input events
         if (Scene::load_new_scene) {
             current_scene.~Scene();
             current_scene = Scene();
@@ -110,6 +128,7 @@ void Engine::GameLoop() {
 
 
 void Engine::SetupInitialProps() {
+    std::cout << "setting up init props" << std::endl;
     rapidjson::Document doc;
     ReadJsonFile("resources/game.config", doc);
 
@@ -135,6 +154,7 @@ void Engine::SetupInitialProps() {
         renderingSettings.colorG = getJsonIntOrDefault(doc, "clear_color_g", 255);
         renderingSettings.colorB = getJsonIntOrDefault(doc, "clear_color_b", 255);
         renderingSettings.zoomFactor = getJsonFloatOrDefault(doc, "zoom_factor", 1.0f);
+        DEBUG = getJsonBoolOrDefault(doc, "debug", false);
     }else{
         renderingSettings.cameraSize.x = 640;
         renderingSettings.cameraSize.y = 360;
