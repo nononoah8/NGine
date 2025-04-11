@@ -36,6 +36,23 @@ public:
     static void SetCamZoom(float z);
     static float GetCamZoom();
 
+    // Camera Direction API
+    static glm::vec3 GetCameraFront();
+    static void SetCameraFront(const glm::vec3& front);
+    static glm::vec3 GetCameraUp();
+    static void SetCameraUp(const glm::vec3& up);
+    static float GetCameraYaw();
+    static void SetCameraYaw(float yaw);
+    static float GetCameraPitch();
+    static void SetCameraPitch(float pitch);
+
+    // Update camera direction based on yaw and pitch
+    static void UpdateCameraDirection();
+
+    // Get the view matrix for forward-looking camera
+    static glm::mat4 GetViewMatrix();
+    
+
     static void Cleanup();
 
     static SDL_GLContext GetContext() { return glContext; };
@@ -51,6 +68,10 @@ private:
     static float clear_color_r;
     static float clear_color_g;
     static float clear_color_b;
+    static glm::vec3 cameraFront;
+    static glm::vec3 cameraUp;
+    static float cameraYaw;
+    static float cameraPitch;
 
     static SDL_GLContext glContext;
 };

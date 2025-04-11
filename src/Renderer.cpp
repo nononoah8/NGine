@@ -7,7 +7,8 @@
 
 #include <iostream>
 #include "Renderer.h"
-#include "glm/glm.hpp"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include "Input.h"
 
 // Define static members
@@ -22,6 +23,12 @@ float Renderer::clear_color_b = 1.0f;
 glm::vec2 Renderer::camera_size;
 glm::vec3 Renderer::camera_pos;
 float Renderer::zoom;
+
+glm::vec3 Renderer::cameraFront(0.0f, 0.0f, -1.0f);
+glm::vec3 Renderer::cameraUp(0.0f, 1.0f, 0.0f);
+float Renderer::cameraYaw = -90.0f;
+float Renderer::cameraPitch = 0.0f;
+
 
 SDL_GLContext Renderer::glContext = nullptr;
 
@@ -49,6 +56,13 @@ void Renderer::LoadRenderer(int x_res, int y_res, int r, int g, int b, glm::vec2
     camera_size = cam_size;
     camera_pos = glm::vec3(cam_pos, 1.0f);
     zoom = z;
+
+    camera_pos = glm::vec3(cam_pos.x, cam_pos.y, 3.0f);
+    cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+    cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+    cameraYaw = -90.0f;
+    cameraPitch = 0.0f;
+    
 }
 
 void Renderer::RenderWindow(const std::string& title) {
@@ -156,6 +170,60 @@ void Renderer::SetCamZoom(float z) {
 
 float Renderer::GetCamZoom() {
     return zoom;
+}
+
+// Camera Front direction
+glm::vec3 Renderer::GetCameraFront() {
+    return cameraFront;
+}
+
+void Renderer::SetCameraFront(const glm::vec3& front) {
+    cameraFront = glm::normalize(front);
+}
+
+// Camera Up vector
+glm::vec3 Renderer::GetCameraUp() {
+    return cameraUp;
+}
+
+void Renderer::SetCameraUp(const glm::vec3& up) {
+    cameraUp = glm::normalize(up);
+}
+
+// Camera rotation angles
+float Renderer::GetCameraYaw() {
+    return cameraYaw;
+}
+
+void Renderer::SetCameraYaw(float yaw) {
+    cameraYaw = yaw;
+}
+
+float Renderer::GetCameraPitch() {
+    return cameraPitch;
+}
+
+void Renderer::SetCameraPitch(float pitch) {
+    // Clamp pitch to avoid gimbal lock
+    cameraPitch = glm::clamp(pitch, -89.0f, 89.0f);
+}
+
+// Update camera direction vector from Euler angles (yaw and pitch)
+void Renderer::UpdateCameraDirection() {
+    glm::vec3 front;
+    front.x = cos(glm::radians(cameraYaw)) * cos(glm::radians(cameraPitch));
+    front.y = sin(glm::radians(cameraPitch));
+    front.z = sin(glm::radians(cameraYaw)) * cos(glm::radians(cameraPitch));
+    cameraFront = glm::normalize(front);
+}
+
+// Get the camera view matrix
+glm::mat4 Renderer::GetViewMatrix() {
+    return glm::lookAt(
+        camera_pos,
+        camera_pos + cameraFront,
+        cameraUp
+    );
 }
 
 void Renderer::Cleanup() {

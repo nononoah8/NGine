@@ -14,7 +14,8 @@ public:
     scale(1.0f, 1.0f, 1.0f),
     color(1.0f, 1.0f, 1.0f),
     isActive(true),
-    mesh(nullptr) {}
+    mesh(nullptr),
+    name("") {}
 
   // Core properties
   glm::vec3 position;
@@ -23,6 +24,7 @@ public:
   glm::vec3 color;
   bool isActive = true;
   std::shared_ptr<Mesh> mesh;
+  std::string name;
 
   // Core methods
   void Draw(GLuint shaderProgram, GLint modelLoc);

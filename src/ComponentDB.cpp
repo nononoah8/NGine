@@ -118,6 +118,15 @@ void ComponentDB::Init() {
     .addFunction("GetPositionZ", &Renderer::GetCamPosZ)
     .addFunction("SetZoom", &Renderer::SetCamZoom)
     .addFunction("GetZoom", &Renderer::GetZoom)
+    .addFunction("GetFront", &Renderer::GetCameraFront)
+    .addFunction("SetFront", &Renderer::SetCameraFront) 
+    .addFunction("GetUp", &Renderer::GetCameraUp)
+    .addFunction("SetUp", &Renderer::SetCameraUp)
+    .addFunction("GetYaw", &Renderer::GetCameraYaw)
+    .addFunction("SetYaw", &Renderer::SetCameraYaw)
+    .addFunction("GetPitch", &Renderer::GetCameraPitch)
+    .addFunction("SetPitch", &Renderer::SetCameraPitch)
+    .addFunction("UpdateDirection", &Renderer::UpdateCameraDirection)
     .endNamespace();
 
 

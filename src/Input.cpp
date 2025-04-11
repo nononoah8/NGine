@@ -165,6 +165,7 @@ bool Input::GetKeyUp(SDL_Scancode keycode) {
 bool Input::GetKeyByName(const std::string& keycode) {
   SDL_Scancode scancode = GetScancodeFromKeyName(keycode);
   if(scancode == SDL_SCANCODE_UNKNOWN) {
+    std::cout << "scancode " << keycode <<  " is unknown?" << std::endl;
     return false;
   }
   return GetKey(scancode);

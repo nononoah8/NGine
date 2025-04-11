@@ -69,12 +69,6 @@ void Engine::GameLoop() {
     } else {
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
-    
-    glm::mat4 view = glm::lookAt(
-        Renderer::GetCamPos(),       // Camera Location
-        glm::vec3(0.0f, 0.0f, 0.0f), // Look target
-        glm::vec3(0.0f, 1.0f, 0.0f)  // Up vector
-    );
 
     glm::mat4 projection = glm::perspective(
         glm::radians(45.0f),
@@ -100,6 +94,12 @@ void Engine::GameLoop() {
             Scene::load_new_scene = false;
         }
 
+        // Update camera direction based on yaw and pitch
+        Renderer::UpdateCameraDirection();
+
+        // Get the view matrix with forward-looking camera
+        glm::mat4 view = Renderer::GetViewMatrix();
+
         // Process events
         running = Renderer::Update();
 
@@ -115,7 +115,6 @@ void Engine::GameLoop() {
         UpdateGame();
 
         GameObjectDB::UpdateAll(deltaTime);
-
 
         // Render 3d scene objects
         GameObjectDB::RenderAndClearObjects(shaderProgram->GetID(), modelLoc);
@@ -149,7 +148,6 @@ void Engine::SetupInitialProps() {
     std::cout << "setting up init props" << std::endl;
     rapidjson::Document doc;
     ReadJsonFile("resources/game.config", doc);
-
     
     // game title
     game_title = getJsonStringOrDefault(doc, "game_title", "");
@@ -186,8 +184,8 @@ void Engine::SetupInitialProps() {
     current_scene.LoadScene(initial_scene);
     
     // TextDB::Init(Renderer::renderer);
-    // Input::Init();
-    // AudioDB::Init();
+    Input::Init();
+    AudioDB::Init();
 }
 
 
