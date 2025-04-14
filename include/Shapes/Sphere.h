@@ -50,6 +50,15 @@ namespace Shape {
             vertices.push_back(color.r);
             vertices.push_back(color.g);
             vertices.push_back(color.b);
+
+            // Normal
+            float normalX = xPos / radius;
+            float normalY = yPos / radius;
+            float normalZ = zPos / radius;
+
+            vertices.push_back(normalX);
+            vertices.push_back(normalY);
+            vertices.push_back(normalZ);
           }
         }
 

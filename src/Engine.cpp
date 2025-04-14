@@ -179,7 +179,6 @@ void Engine::SetupInitialProps() {
     Renderer::LoadRenderer(renderingSettings.cameraSize.x, renderingSettings.cameraSize.y, renderingSettings.colorR, renderingSettings.colorG, renderingSettings.colorB, renderingSettings.cameraSize, renderingSettings.zoomFactor, renderingSettings.cameraPos);
     Renderer::RenderWindow(game_title);
 
-    //TODO: Make sure scene loading and everything works properly.
     current_scene = Scene();
     current_scene.LoadScene(initial_scene);
     
@@ -193,7 +192,6 @@ void Engine::UpdateGame() {
     current_scene.Update();
 }
 
-// In Engine.cpp, at the end of the Engine constructor or in a separate method
 void Engine::SetupShaderUniforms() {
     // Make sure the shader is valid
     if (!shaderProgram || !shaderProgram->GetID()) {

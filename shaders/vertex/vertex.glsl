@@ -4,11 +4,11 @@ layout (location = 1) in vec3 aColor;
 layout (location = 2) in vec3 aNormal;
 
 uniform mat4 model;
-uniform mat4 view;       // Added view matrix
-uniform mat4 projection; // Added projection matrix
+uniform mat4 view;
+uniform mat4 projection;
 
 out vec3 ourColor;
-out vec3 fragPos;  // For lighting calculations
+out vec3 fragPos;
 out vec3 Normal;
 
 void main() {

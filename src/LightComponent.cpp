@@ -1,5 +1,7 @@
 #include "LightComponent.h"
 
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <glad/glad.h>
 
 LightComponent LightComponent::CreateDirectionalLight(
@@ -12,7 +14,6 @@ LightComponent LightComponent::CreateDirectionalLight(
   light.direction = glm::normalize(direction);
   light.color = color;
   light.intensity = intensity;
-  light.castShadows = true; // Directional lights typically cast shadows
   return light;
 }
 
@@ -55,5 +56,23 @@ LightComponent LightComponent::CreateSpotLight(
 }
 
 void LightComponent::ApplyToShader(unsigned int shaderProgram, const std::string& uniformName) const {
-  return;
+  // Set light type
+  glUniform1i(glGetUniformLocation(shaderProgram, (uniformName + ".type").c_str()), static_cast<int>(type));
+
+  // Set position and direction
+  glUniform3fv(glGetUniformLocation(shaderProgram, (uniformName + ".position").c_str()), 1, glm::value_ptr(position));
+  glUniform3fv(glGetUniformLocation(shaderProgram, (uniformName + ".direction").c_str()), 1, glm::value_ptr(direction));
+
+  // Set color and intensity
+  glUniform3fv(glGetUniformLocation(shaderProgram, (uniformName + ".color").c_str()), 1, glm::value_ptr(color));
+  glUniform1f(glGetUniformLocation(shaderProgram, (uniformName + ".intensity").c_str()), intensity);
+
+  // Set attenuation factors (primarily used by point and spot lights)
+  glUniform1f(glGetUniformLocation(shaderProgram, (uniformName + ".constant").c_str()), constant);
+  glUniform1f(glGetUniformLocation(shaderProgram, (uniformName + ".linear").c_str()), linear);
+  glUniform1f(glGetUniformLocation(shaderProgram, (uniformName + ".quadratic").c_str()), quadratic);
+
+  // Set spotlight parameters (convert degrees to cosine values for shader efficiency)
+  glUniform1f(glGetUniformLocation(shaderProgram, (uniformName + ".innerCutoff").c_str()), glm::cos(glm::radians(innerCutoff)));
+  glUniform1f(glGetUniformLocation(shaderProgram, (uniformName + ".outerCutoff").c_str()), glm::cos(glm::radians(outerCutoff)));
 }

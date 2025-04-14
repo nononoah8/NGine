@@ -27,7 +27,6 @@ private:
   float innerCutoff;       // Inner cone angle (in degrees)
   float outerCutoff;       // Outer cone angle (in degrees)
 
-  bool castShadows;        // Whether this light casts shadows
   std::string name;        // Identifier for the light
 public:
   LightComponent() :
@@ -41,7 +40,6 @@ public:
     quadratic(0.032f),
     innerCutoff(12.5f),
     outerCutoff(17.5f),
-    castShadows(false),
     name("Light") {}
 
     static LightComponent CreateDirectionalLight(
@@ -97,9 +95,6 @@ public:
     
     float GetOuterCutoff() const { return outerCutoff; }
     void SetOuterCutoff(float degrees) { outerCutoff = degrees; }
-    
-    bool GetCastShadows() const { return castShadows; }
-    void SetCastShadows(bool value) { castShadows = value; }
     
     std::string GetName() const { return name; }
     void SetName(const std::string& newName) { name = newName; }

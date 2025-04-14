@@ -4,6 +4,7 @@ cube = {
   speed = 0.0003, -- rotation amount per frame
   camMoveSpeed = 0.0005,
   camAngleSpeed = 0.03,
+  pos = Vector3(0, 0, 0),
   
   OnUpdate = function(self)
     local xPos = Camera.GetPositionX()
@@ -22,7 +23,6 @@ cube = {
     local y = self.radius
     
     -- Draw the cube at the calculated position (size 0.1)
-    local pos = Vector3(x, y, z)
 
     -- Forward/backward movement
     if Input.GetKey("w") then
@@ -72,11 +72,24 @@ cube = {
     if Input.GetKey("down") then
         Camera.SetPitch(pitch - self.camAngleSpeed)
     end
+
+    if Input.GetKey("i") then
+      self.pos.y = self.pos.y + 0.001
+    end
+    if Input.GetKey("j") then
+      self.pos.x = self.pos.x - 0.001
+    end
+    if Input.GetKey("k") then
+      self.pos.y = self.pos.y - 0.001
+    end
+    if Input.GetKey("l") then
+      self.pos.x = self.pos.x + 0.001
+    end
     
     -- Update camera position
     Camera.SetPosition(xPos, yPos, zPos)
 
-    Shape.DrawCube(0.1, pos)
+    Shape.DrawCube(0.1, self.pos)
     Shape.DrawSphere(0.05, Vector3(0.8, 0.5, 0.0), 16, Vector3(z, x, y))
   end
 }
