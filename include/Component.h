@@ -26,9 +26,8 @@ public:
     addedStart(false),
     addedUpdate(false),
     addedLate(false),
-    isRb(false),
     hasDestroy(false),
-    isPs(false) {}
+    isLC(false) {}
 
   bool IsEnabled();
 
@@ -50,8 +49,7 @@ public:
   bool addedStart;
   bool addedUpdate;
   bool addedLate;
-  bool isRb;
-  bool isPs; // is particle system
+  bool isLC;
 };
 
 #endif

@@ -15,7 +15,13 @@ public:
     color(1.0f, 1.0f, 1.0f),
     isActive(true),
     mesh(nullptr),
-    name("") {}
+    name(""),
+    material({
+      glm::vec3(0.1f),
+      glm::vec3(0.8f),
+      glm::vec3(0.5f),
+      32.0f
+    }) {}
 
   // Core properties
   glm::vec3 position;
@@ -25,6 +31,15 @@ public:
   bool isActive = true;
   std::shared_ptr<Mesh> mesh;
   std::string name;
+
+  struct Material {
+    glm::vec3 ambient;
+    glm::vec3 diffuse;
+    glm::vec3 specular;
+    float shininess;
+  };
+
+  Material material;
 
   // Core methods
   void Draw(GLuint shaderProgram, GLint modelLoc);
@@ -41,6 +56,26 @@ public:
   void SetPosition(glm::vec3 pos) { position = pos; }
   void SetPosition(float x, float y, float z) { position = glm::vec3(x, y, z); }
   glm::vec3 GetPosition() { return position; }
+
+  void SetMaterial(const Material& newMaterial) {
+    material = newMaterial;
+  }
+
+  void SetMetallic(float value = 0.8f) {
+    // Preset for metallic surfaces
+    material.ambient = color * 0.1f;
+    material.diffuse = color * 0.6f;
+    material.specular = glm::vec3(value);
+    material.shininess = 64.0f;
+  }
+
+  void SetPlastic(float value = 0.5f) {
+    // Preset for plastic surfaces
+    material.ambient = color * 0.1f;
+    material.diffuse = color * 0.9f;
+    material.specular = glm::vec3(value);
+    material.shininess = 16.0f;
+  }
 private:
 };
 

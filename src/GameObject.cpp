@@ -1,5 +1,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
+#include <iostream>
+
 #include "GameObject.h"
 #include "Renderer.h"
 #include "Shader.h"
@@ -9,10 +11,25 @@
 
 void GameObject::Draw(GLuint shaderProgram, GLint modelLoc) {
   if (!isActive || !mesh) return;
+
+  glm::mat4 model = glm::mat4(1.0f);
+  model = glm::translate(model, position);
+  model = glm::rotate(model, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+  model = glm::rotate(model, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+  model = glm::rotate(model, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+  model = glm::scale(model, scale);
   
-  // Create and set model matrix
-  glm::mat4 modelMatrix = GetModelMatrix();
-  glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelMatrix));
+  // Pass model matrix to shader
+  glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+  
+  // Set material properties
+  glUniform3fv(glGetUniformLocation(shaderProgram, "material.ambient"), 1, glm::value_ptr(material.ambient));
+  glUniform3fv(glGetUniformLocation(shaderProgram, "material.diffuse"), 1, glm::value_ptr(material.diffuse));
+  glUniform3fv(glGetUniformLocation(shaderProgram, "material.specular"), 1, glm::value_ptr(material.specular));
+  glUniform1f(glGetUniformLocation(shaderProgram, "material.shininess"), material.shininess);
+  
+  // Set the color
+  glUniform3fv(glGetUniformLocation(shaderProgram, "ourColor"), 1, glm::value_ptr(color));
   
   // Draw the mesh
   mesh->Draw();

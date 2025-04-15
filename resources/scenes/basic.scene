@@ -7,6 +7,14 @@
           "type": "cube"
         }
       }
+    },
+    {
+      "name": "LightActor",
+      "components": {
+        "1": {
+          "type": "Light"
+        }
+      }
     }
   ]
 }

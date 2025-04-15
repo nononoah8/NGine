@@ -13,6 +13,7 @@
 
 #include "GameObjectDB.h"
 #include "GameObject.h"
+#include "LightComponent.h"
 
 #include <filesystem>
 #include <string>
@@ -97,18 +98,6 @@ void ComponentDB::Init() {
     .addFunction("SetVolume", &AudioDB::SetVolume)
     .endNamespace();
 
-
-
-    // Add Image manager
-    // luabridge::getGlobalNamespace(ComponentManager::lua_state)
-    // .beginNamespace("Image")
-    // .addFunction("DrawUI", &ImageDB::DrawUI)
-    // .addFunction("DrawUIEx", &ImageDB::DrawUIEx)
-    // .addFunction("Draw", &ImageDB::Draw)
-    // .addFunction("DrawEx", &ImageDB::DrawEx)
-    // .addFunction("DrawPixel", &ImageDB::DrawPixel)
-    // .endNamespace();
-
     // // Add Camera manager
     luabridge::getGlobalNamespace(ComponentManager::lua_state)
     .beginNamespace("Camera")
@@ -146,34 +135,9 @@ void ComponentDB::Init() {
     .addFunction("DrawSphere", &GameObjectDB::CreateSphere)
     .endNamespace();
 
-    // luabridge::getGlobalNamespace(ComponentManager::lua_state)
-    // .beginClass<GameObject>("GameObject")
-    // .addProperty("position", &GameObject::position)
-    // .addProperty("rotation", &GameObject::rotation)
-    // .addProperty("scale", &GameObject::scale)
-    // .endClass();
-
     luabridge::getGlobalNamespace(ComponentManager::lua_state)
     .beginClass<std::shared_ptr<GameObject>>("GameObjectPtr")
-    // .addFunction("GetPosition", &GetGameObjectPosition)
-    // .addFunction("SetPosition", &SetGameObjectPosition)
-    // .addFunction("SetPositionXYZ", &SetGameObjectPositionXYZ)
     .endClass();
-
-    // // Add "Vector2" datatype
-    // luabridge::getGlobalNamespace(ComponentManager::lua_state)
-    // .beginClass<b2Vec2>("Vector2")
-    // .addConstructor<void(*) (float, float)>()
-    // .addProperty("x", &b2Vec2::x)
-    // .addProperty("y", &b2Vec2::y)
-    // .addFunction("Normalize", &b2Vec2::Normalize)
-    // .addFunction("Length", &b2Vec2::Length)
-    // .addFunction("__add", &b2Vec2::operator_add)
-    // .addFunction("__sub", &b2Vec2::operator_sub)
-    // .addFunction("__mul", &b2Vec2::operator_mult)
-    // .addStaticFunction("Distance", &b2Vec2::Distance)
-    // .addStaticFunction("Dot", &b2Vec2::Dot)
-    // .endClass();
 
     // Add Scene manager
     luabridge::getGlobalNamespace(ComponentManager::lua_state)
@@ -182,23 +146,6 @@ void ComponentDB::Init() {
     .addFunction("GetCurrent", &Scene::GetCurrent)
     .addFunction("DontDestroy", &Scene::DontDestroy)
     .endNamespace();
-    
-    // luabridge::getGlobalNamespace(ComponentManager::lua_state)
-    // .beginClass<ParticleSystem>("ParticleSystem")
-    // .addProperty("x", &ParticleSystem::x)
-    // .addProperty("y", &ParticleSystem::y)
-    // .addProperty("start_color_r", &ParticleSystem::start_color_r)
-    // .addProperty("start_color_g", &ParticleSystem::start_color_g)
-    // .addProperty("start_color_b", &ParticleSystem::start_color_b)
-    // .addProperty("start_color_a", &ParticleSystem::start_color_a)
-    // .addProperty("enabled", &ParticleSystem::getEnabled, &ParticleSystem::setEnabled)
-    // .addProperty("frames_between_bursts", &ParticleSystem::frames_between_bursts)
-    // .addProperty("burst_quantity", &ParticleSystem::burst_quantity)
-    // .addProperty("duration_frames", &ParticleSystem::duration_frames)
-    // .addFunction("Stop", &ParticleSystem::Stop)
-    // .addFunction("Play", &ParticleSystem::Play)
-    // .addFunction("Burst", &ParticleSystem::Burst)
-    // .endClass();
 
     luabridge::getGlobalNamespace(ComponentManager::lua_state)
     .beginNamespace("Event")
@@ -206,6 +153,35 @@ void ComponentDB::Init() {
     .addFunction("Subscribe", &EventSystem::Subscribe)
     .addFunction("Unsubscribe", &EventSystem::Unsubscribe)
     .endNamespace();
+
+    // LightComopnent 
+    luabridge::getGlobalNamespace(ComponentManager::lua_state)
+    .beginClass<LightComponent>("LightComponent")
+    // Light properties getters
+    .addFunction("GetType", &LightComponent::GetType)
+    .addFunction("GetPosition", &LightComponent::GetPosition)
+    .addFunction("GetDirection", &LightComponent::GetDirection)
+    .addFunction("GetColor", &LightComponent::GetColor)
+    .addFunction("GetIntensity", &LightComponent::GetIntensity)
+    .addFunction("GetConstant", &LightComponent::GetConstant)
+    .addFunction("GetLinear", &LightComponent::GetLinear)
+    .addFunction("GetQuadratic", &LightComponent::GetQuadratic)
+    .addFunction("GetInnerCutoff", &LightComponent::GetInnerCutoff)
+    .addFunction("GetOuterCutoff", &LightComponent::GetOuterCutoff)
+    .addFunction("GetName", &LightComponent::GetName)
+    // Light properties setters
+    .addFunction("SetType", &LightComponent::SetType)
+    .addFunction("SetPosition", &LightComponent::SetPosition)
+    .addFunction("SetDirection", &LightComponent::SetDirection)
+    .addFunction("SetColor", &LightComponent::SetColor)
+    .addFunction("SetIntensity", &LightComponent::SetIntensity)
+    .addFunction("SetConstant", &LightComponent::SetConstant)
+    .addFunction("SetLinear", &LightComponent::SetLinear)
+    .addFunction("SetQuadratic", &LightComponent::SetQuadratic)
+    .addFunction("SetInnerCutoff", &LightComponent::SetInnerCutoff)
+    .addFunction("SetOuterCutoff", &LightComponent::SetOuterCutoff)
+    .addFunction("SetName", &LightComponent::SetName)
+    .endClass();
 }
 
 std::shared_ptr<Component> ComponentDB::AddComponent(std::string component_name) {

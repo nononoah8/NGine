@@ -20,8 +20,7 @@
 #include "ComponentManager.h"
 #include "Lua/lua.hpp"
 #include "LuaBridge/LuaBridge.h"
-
-//TODO: CLean up!!!!!
+#include "LightComponent.h"
 
 class Actor : public std::enable_shared_from_this<Actor> {
 public:
@@ -55,24 +54,20 @@ public:
     luabridge::LuaRef GetComponentByKey(const std::string& key) {
         auto it = components.find(key);
         if(it != components.end()) {
-            // if(it->second->isRb) {
-            //     return luabridge::LuaRef(ComponentManager::lua_state, std::static_pointer_cast<Rigidbody>(it->second).get());
-            // }else if(it->second->isPs) {
-            //     return luabridge::LuaRef(ComponentManager::lua_state, std::static_pointer_cast<ParticleSystem>(it->second).get());
-            // }
+            if(it->second->isLC) {
+                return luabridge::LuaRef(ComponentManager::lua_state, std::static_pointer_cast<LightComponent>(it->second).get());
+            }
             return *(it->second->componentRef);
         }
         return luabridge::LuaRef(ComponentManager::lua_state);
     }
-
+    
     luabridge::LuaRef GetComponent(const std::string& type) {
         auto it = componentsByType.find(type);
         if (it != componentsByType.end() && !it->second.empty()) {
-            // if(it->second.front()->isRb) {
-            //     return luabridge::LuaRef(ComponentManager::lua_state, std::static_pointer_cast<Rigidbody>(it->second.front()).get());
-            // }else if(it->second.front()->isPs) {
-            //     return luabridge::LuaRef(ComponentManager::lua_state, std::static_pointer_cast<ParticleSystem>(it->second.front()).get());
-            // }
+            if(it->second.front()->isLC) {
+                return luabridge::LuaRef(ComponentManager::lua_state, std::static_pointer_cast<LightComponent>(it->second.front()).get());
+            }
             return *(it->second.front()->componentRef);
         }
         return luabridge::LuaRef(ComponentManager::lua_state);
@@ -84,13 +79,11 @@ public:
             luabridge::LuaRef returnTable = luabridge::newTable(ComponentManager::lua_state);
             int idx = 1;
             for (const auto& component : it->second) {
-                // if(component->isRb) {
-                //     returnTable[idx++] = luabridge::LuaRef(ComponentManager::lua_state, std::static_pointer_cast<Rigidbody>(component).get());
-                // }else if(component->isPs) {
-                //     returnTable[idx++] = luabridge::LuaRef(ComponentManager::lua_state, std::static_pointer_cast<ParticleSystem>(component).get());
-                // }else {
-                // }
-                returnTable[idx++] = *(component->componentRef);
+                if(component->isLC) {
+                    returnTable[idx++] = luabridge::LuaRef(ComponentManager::lua_state, std::static_pointer_cast<LightComponent>(component).get());
+                } else {
+                    returnTable[idx++] = *(component->componentRef);
+                }
             }
             return returnTable;
         }
@@ -103,28 +96,22 @@ public:
         std::shared_ptr<Component> newComponent = std::make_shared<Component>();
         luabridge::LuaRef componentInstance = luabridge::newTable(ComponentManager::lua_state);
 
-        // if(type_name == "Rigidbody") {
-        //     auto rigidbody = std::make_shared<Rigidbody>();
-        //     // rigidbody->isRb = true;
-        //     rigidbody->hasStart = true;
-        //     rigidbody->key = key;
-        //     rigidbody->type = "Rigidbody";
-        //     newComponent = rigidbody;
-        // }else if(type_name == "ParticleSystem") {
-        //     auto particlesystem = std::make_shared<ParticleSystem>();
-        //     particlesystem->isPs = true;
-        //     particlesystem->hasStart = true;
-        //     particlesystem->hasUpdate = true;
-        //     particlesystem->key = key;
-        //     particlesystem->type = "ParticleSystem";
-        //     newComponent = particlesystem;
-        // } else {
-        // }
-        // Ceate the new component.
-        std::shared_ptr<Component> baseComponent = ComponentDB::AddComponent(type_name);
-        ComponentDB::EstablishInheritance(componentInstance, *(baseComponent->componentRef));
-
-        newComponent->SetComponentProps();
+        if(type_name == "Light") {
+            auto lightComponent = std::make_shared<LightComponent>();
+            lightComponent->isLC = true;
+            lightComponent->hasStart = false;  // Lights don't need Start/Update
+            lightComponent->hasUpdate = false;
+            lightComponent->key = key;
+            lightComponent->type = "Light";
+            newComponent = lightComponent;
+            LightComponent::RegisterLight(lightComponent);
+        } else {
+            // Create the new component.
+            std::shared_ptr<Component> baseComponent = ComponentDB::AddComponent(type_name);
+            ComponentDB::EstablishInheritance(componentInstance, *(baseComponent->componentRef));
+    
+            newComponent->SetComponentProps();
+        }
 
         newComponent->componentRef = std::make_shared<luabridge::LuaRef>(componentInstance);
         newComponent->type = type_name;
@@ -149,12 +136,12 @@ public:
         // increment the global 'n', global int counter of num times addcomponent has been called.
         ComponentManager::num_runtime_components++;
 
-        // retrun the luaref of the newly created component
-        // if(newComponent->isRb) {
-        //     return luabridge::LuaRef(ComponentManager::lua_state, std::static_pointer_cast<Rigidbody>(newComponent).get());
-        // }else {
-        // }
-        return componentInstance;
+        // return the luaref of the newly created component
+        if(newComponent->isLC) {
+            return luabridge::LuaRef(ComponentManager::lua_state, std::static_pointer_cast<LightComponent>(newComponent).get());
+        } else {
+            return componentInstance;
+        }
     }
 
     void RemoveComponent(luabridge::LuaRef component) {

@@ -19,6 +19,7 @@
 #include "Shapes/Sphere.h"
 #include "GameObjectDB.h"
 #include "GameObject.h"
+#include "LightComponent.h"
 
 #include "Application.hpp"
 
@@ -112,6 +113,8 @@ void Engine::GameLoop() {
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
         glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
+        LightComponent::ApplyAllLightsToShader(shaderProgram->GetID());
+
         UpdateGame();
 
         GameObjectDB::UpdateAll(deltaTime);
@@ -143,9 +146,7 @@ void Engine::GameLoop() {
     AudioDB::Shutdown();
 } 
 
-
 void Engine::SetupInitialProps() {
-    std::cout << "setting up init props" << std::endl;
     rapidjson::Document doc;
     ReadJsonFile("resources/game.config", doc);
     

@@ -9,6 +9,7 @@
 #include "AudioDB.h"
 #include "ComponentManager.h"
 #include "ComponentDB.hpp"
+#include "LightComponent.h"
 
 void ReportError(std::string& actor_name, const luabridge::LuaException& e);
 std::shared_ptr<Component> LoadExistingComponent(std::shared_ptr<Component> component);
@@ -107,7 +108,7 @@ void Scene::LoadScene(std::string& scene_name) {
                     newActor->componentsByType[componentType].push_back(newActor->components[componentKey]);
                     newActor->components[componentKey]->key = componentKey;
 
-                    if(newActor->components[componentKey]->hasStart || newActor->components[componentKey]->isRb) {
+                    if(newActor->components[componentKey]->hasStart) {
                         onStartComponents.push_back(newActor->components[componentKey]);
                     }
                     if(newActor->components[componentKey]->hasUpdate) {
@@ -121,7 +122,7 @@ void Scene::LoadScene(std::string& scene_name) {
                     LoadComponent(componentKey, "", newActor->components, component.value, newActor);
                     newActor->components[componentKey]->SetComponentProps();
                     newActor->components[componentKey]->key = componentKey;
-                    if(newActor->components[componentKey]->hasStart || newActor->components[componentKey]->isRb) {
+                    if(newActor->components[componentKey]->hasStart) {
                         onStartComponents.push_back(newActor->components[componentKey]);
                     }
                     if(newActor->components[componentKey]->hasUpdate) {
@@ -137,7 +138,7 @@ void Scene::LoadScene(std::string& scene_name) {
                 componentPair.second->SetComponentProps();
                 componentPair.second->key = componentPair.first;
                 componentPair.second->actor = newActor;
-                if(componentPair.second->hasStart || componentPair.second->isRb) {
+                if(componentPair.second->hasStart) {
                     onStartComponents.push_back(componentPair.second);
                 }
                 if(componentPair.second->hasUpdate) {
@@ -152,9 +153,7 @@ void Scene::LoadScene(std::string& scene_name) {
         // loop through all of the actor's components
         for(auto& component : newActor->components) {
             std::shared_ptr<Component> componentInstance = component.second;
-            if(!component.second->isRb){
-                newActor->InjectConvenienceReferences(componentInstance);
-            }
+            newActor->InjectConvenienceReferences(componentInstance);
         }
 
         actor_name_map[newActor->name].push_back(newActor);
@@ -198,21 +197,89 @@ void Scene::LoadComponent(const std::string& componentKey, const std::string& co
     } else {
         std::shared_ptr<Component> newComponent = std::make_shared<Component>();
 
-        // Create a new component instance
-        std::shared_ptr<Component> baseComponent = ComponentDB::AddComponent(componentType);
-        luabridge::LuaRef componentInstance = luabridge::newTable(ComponentManager::lua_state);
-        ComponentDB::EstablishInheritance(componentInstance, *(baseComponent->componentRef));
-        componentInstance["key"] = componentKey;
+        if(componentType == "Light") {
+            // Create a new LightComponent
+            auto lightComponent = std::make_shared<LightComponent>();
+            
+            // Set the basic light type
+            std::string lightTypeStr = getJsonStringOrDefault(componentData, "lightType", "POINT");
+            if (lightTypeStr == "DIRECTIONAL") {
+                lightComponent->SetType(LightType::DIRECTIONAL);
+            } else if (lightTypeStr == "POINT") {
+                lightComponent->SetType(LightType::POINT);
+            } else if (lightTypeStr == "SPOT") {
+                lightComponent->SetType(LightType::SPOT);
+            }
+            
+            // Position
+            float posX = getJsonFloatOrDefault(componentData, "positionX", 0.0f);
+            float posY = getJsonFloatOrDefault(componentData, "positionY", 0.0f);
+            float posZ = getJsonFloatOrDefault(componentData, "positionZ", 0.0f);
+            lightComponent->SetPosition(glm::vec3(posX, posY, posZ));
+            
+            // Direction
+            float dirX = getJsonFloatOrDefault(componentData, "directionX", 0.0f);
+            float dirY = getJsonFloatOrDefault(componentData, "directionY", -1.0f);
+            float dirZ = getJsonFloatOrDefault(componentData, "directionZ", 0.0f);
+            lightComponent->SetDirection(glm::vec3(dirX, dirY, dirZ));
+            
+            // Color
+            float colorR = getJsonFloatOrDefault(componentData, "colorR", 1.0f);
+            float colorG = getJsonFloatOrDefault(componentData, "colorG", 1.0f);
+            float colorB = getJsonFloatOrDefault(componentData, "colorB", 1.0f);
+            lightComponent->SetColor(glm::vec3(colorR, colorG, colorB));
+            
+            // Basic light properties
+            lightComponent->SetIntensity(getJsonFloatOrDefault(componentData, "intensity", 1.0f));
+            
+            // Attenuation factors
+            lightComponent->SetConstant(getJsonFloatOrDefault(componentData, "constant", 1.0f));
+            lightComponent->SetLinear(getJsonFloatOrDefault(componentData, "linear", 0.09f));
+            lightComponent->SetQuadratic(getJsonFloatOrDefault(componentData, "quadratic", 0.032f));
+            
+            // Spotlight parameters
+            lightComponent->SetInnerCutoff(getJsonFloatOrDefault(componentData, "innerCutoff", 12.5f));
+            lightComponent->SetOuterCutoff(getJsonFloatOrDefault(componentData, "outerCutoff", 17.5f));
+            
+            // Light name
+            lightComponent->SetName(getJsonStringOrDefault(componentData, "name", "Light"));
 
-        // Set properties on the new component instance
-        SetComponentProperties(componentInstance, componentData);
+            lightComponent->hasStart = false;
+            lightComponent->hasUpdate = false;
+            lightComponent->hasLateUpdate = false;
 
-        if (!componentInstance["enabled"].isBool()) {
-            componentInstance["enabled"] = true;
+            newComponent = lightComponent;
+
+            luabridge::LuaRef componentInstance = luabridge::newTable(ComponentManager::lua_state);
+            componentInstance["key"] = componentKey;
+            if (!componentInstance["enabled"].isBool()) {
+                componentInstance["enabled"] = true;
+            }
+            componentInstance["type"] = componentType;
+
+            newComponent->isLC = true;
+
+            newComponent->componentRef = std::make_shared<luabridge::LuaRef>(componentInstance);
+
+            LightComponent::RegisterLight(lightComponent);
+        }else {
+            // Create a new component instance
+            std::shared_ptr<Component> baseComponent = ComponentDB::AddComponent(componentType);
+            luabridge::LuaRef componentInstance = luabridge::newTable(ComponentManager::lua_state);
+            ComponentDB::EstablishInheritance(componentInstance, *(baseComponent->componentRef));
+            componentInstance["key"] = componentKey;
+    
+            // Set properties on the new component instance
+            SetComponentProperties(componentInstance, componentData);
+    
+            if (!componentInstance["enabled"].isBool()) {
+                componentInstance["enabled"] = true;
+            }
+    
+            // Store the new component instance in the components map
+            newComponent->componentRef = std::make_shared<luabridge::LuaRef>(componentInstance);
         }
 
-        // Store the new component instance in the components map
-        newComponent->componentRef = std::make_shared<luabridge::LuaRef>(componentInstance);
 
         newComponent->type = componentType;
         newComponent->key = componentKey;
@@ -371,7 +438,7 @@ void Scene::Update() {
             list.erase(std::remove(list.begin(), list.end(), component), list.end());
         };
 
-        if(component->hasDestroy || component->isRb) {
+        if(component->hasDestroy) {
             try {
                 (*component->componentRef)["OnDestroy"](*component->componentRef);
             } catch (luabridge::LuaException const& e) {
@@ -427,12 +494,27 @@ luabridge::LuaRef Scene::InstantiateActor(const std::string& template_name) {
 
         // Add the components to the actor object
         for (const auto& componentPair : it->second->components) {
-            std::shared_ptr<Component> newComponent = LoadExistingComponent(componentPair.second);
-            newActor->components[componentPair.first] = newComponent;
-            newComponent->SetComponentProps();
-            newActor->componentsByType[componentPair.second->type].push_back(newComponent);
-            newComponent->actor = newActor;
-            newComponent->type = componentPair.second->type;
+            std::shared_ptr<Component> newComponent = std::make_shared<Component>();
+            if(componentPair.second->type == "Light") {
+                newComponent = std::make_shared<LightComponent>(*std::static_pointer_cast<LightComponent>(componentPair.second));
+                newComponent->type = "Light";
+                newComponent->key = componentPair.second->key;
+                newComponent->isLC = true;
+                newComponent->hasStart = false;  // Lights don't need Start/Update
+                newComponent->hasUpdate = false;
+                newComponent->hasLateUpdate = false;
+                newComponent->isLC = true;
+                newActor->components[componentPair.first] = newComponent;
+                newComponent->actor = newActor;
+                newActor->componentsByType[componentPair.second->type].push_back(newComponent);
+            } else {
+                std::shared_ptr<Component> newComponent = LoadExistingComponent(componentPair.second);
+                newActor->components[componentPair.first] = newComponent;
+                newComponent->SetComponentProps();
+                newActor->componentsByType[componentPair.second->type].push_back(newComponent);
+                newComponent->actor = newActor;
+                newComponent->type = componentPair.second->type;
+            }
         }
 
         // Inject convenience references
@@ -446,7 +528,7 @@ luabridge::LuaRef Scene::InstantiateActor(const std::string& template_name) {
 
         // Return the Actor table reference
         return luabridge::LuaRef(ComponentManager::lua_state, newActor.get());
-    }else {
+    } else {
         // Template doesn't exist
         std::cout << "error: template " << template_name << " does not exist";
         exit(0);

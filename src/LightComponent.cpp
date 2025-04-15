@@ -4,60 +4,22 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glad/glad.h>
 
-LightComponent LightComponent::CreateDirectionalLight(
-  const glm::vec3& direction, 
-  const glm::vec3& color,
-  float intensity) {
-  
-  LightComponent light;
-  light.type = LightType::DIRECTIONAL;
-  light.direction = glm::normalize(direction);
-  light.color = color;
-  light.intensity = intensity;
-  return light;
-}
+std::vector<std::shared_ptr<LightComponent>> LightComponent::lights;
 
-LightComponent LightComponent::CreatePointLight(
-  const glm::vec3& position,
-  const glm::vec3& color,
-  float intensity,
-  float constant,
-  float linear,
-  float quadratic) {
+void LightComponent::ApplyAllLightsToShader(unsigned int shaderProgram) {
   
-  LightComponent light;
-  light.type = LightType::POINT;
-  light.position = position;
-  light.color = color;
-  light.intensity = intensity;
-  light.constant = constant;
-  light.linear = linear;
-  light.quadratic = quadratic;
-  return light;
-}
-
-LightComponent LightComponent::CreateSpotLight(
-  const glm::vec3& position,
-  const glm::vec3& direction,
-  const glm::vec3& color,
-  float intensity,
-  float innerCutoff,
-  float outerCutoff) {
+  glUniform1i(glGetUniformLocation(shaderProgram, "numLights"), static_cast<int>(lights.size()));
   
-  LightComponent light;
-  light.type = LightType::SPOT;
-  light.position = position;
-  light.direction = glm::normalize(direction);
-  light.color = color;
-  light.intensity = intensity;
-  light.innerCutoff = innerCutoff;
-  light.outerCutoff = outerCutoff;
-  return light;
+  // Apply each light to the shader with its own uniform location
+  for (size_t i = 0; i < lights.size(); i++) {
+    std::string uniformPrefix = "lights[" + std::to_string(i) + "]";
+    lights[i]->ApplyToShader(shaderProgram, uniformPrefix);
+  }
 }
 
 void LightComponent::ApplyToShader(unsigned int shaderProgram, const std::string& uniformName) const {
   // Set light type
-  glUniform1i(glGetUniformLocation(shaderProgram, (uniformName + ".type").c_str()), static_cast<int>(type));
+  glUniform1i(glGetUniformLocation(shaderProgram, (uniformName + ".type").c_str()), static_cast<int>(lightType));
 
   // Set position and direction
   glUniform3fv(glGetUniformLocation(shaderProgram, (uniformName + ".position").c_str()), 1, glm::value_ptr(position));
