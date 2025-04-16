@@ -16,11 +16,11 @@ const int SPOT_LIGHT = 2;
 
 // Light struct matching your LightComponent class
 struct Light {
-    int type;               // Light type (directional, point, spot)
-    vec3 position;          // Position (for point/spot lights)
-    vec3 direction;         // Direction (for directional/spot lights)
-    vec3 color;             // Base color
-    float intensity;        // Brightness multiplier
+    int type;
+    vec3 position;
+    vec3 direction;
+    vec3 color;
+    float intensity;
     
     // Attenuation properties
     float constant;
@@ -28,8 +28,8 @@ struct Light {
     float quadratic;
     
     // Spotlight properties
-    float innerCutoff;      // Cosine of inner angle
-    float outerCutoff;      // Cosine of outer angle
+    float innerCutoff;
+    float outerCutoff;
 };
 
 // Material properties
@@ -41,9 +41,9 @@ struct Material {
 };
 
 // Uniforms
-uniform Light light;        // Currently active light
-uniform Material material;  // Material properties
-uniform vec3 viewPos;       // Camera position
+uniform Light light;
+uniform Material material;
+uniform vec3 viewPos;
 uniform int numLights;
 uniform Light lights[MAX_LIGHTS];
 
@@ -52,7 +52,13 @@ vec3 CalcDirectionalLight(Light light, vec3 normal, vec3 viewDir) {
     vec3 lightDir = normalize(-light.direction);
 
     // Diffuse shading
-    float diff = max(dot(normal, lightDir), 0.0);
+    float NdotL = dot(normal, lightDir);
+    if (NdotL <= 0.0) {
+        // Surface is facing away from light - only apply ambient
+        return light.color * material.ambient * light.intensity * 0.3; // Reduced ambient
+    }
+
+    float diff = NdotL;
 
     // Specular shading
     vec3 reflectDir = reflect(-lightDir, normal);
@@ -71,19 +77,26 @@ vec3 CalcDirectionalLight(Light light, vec3 normal, vec3 viewDir) {
 vec3 CalcPointLight(Light light, vec3 normal, vec3 fragPos, vec3 viewDir) {
     // Vector from fragment to light
     vec3 lightDir = normalize(light.position - fragPos);
-    
+
     // Diffuse shading
-    float diff = max(dot(normal, lightDir), 0.0);
-    
+    // Check if surface faces away from light (backside)
+    float NdotL = dot(normal, lightDir);
+    if (NdotL <= 0.0) {
+        // Surface is facing away from light - only apply ambient
+        return light.color * material.ambient * light.intensity * 0.3;
+    }
+
+    // Rest of your lighting calculation for surfaces facing the light
+    float diff = NdotL;
+
     // Specular shading
     vec3 reflectDir = reflect(-lightDir, normal);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
     
     // Attenuation (light falloff with distance)
     float distance = length(light.position - fragPos);
-    float attenuation = 1.0 / (light.constant + light.linear * distance + 
-                           light.quadratic * (distance * distance));
-    
+    float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
+
     // Combine results
     vec3 ambient = light.color * material.ambient * light.intensity;
     vec3 diffuse = light.color * diff * material.diffuse * light.intensity;

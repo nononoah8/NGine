@@ -13,6 +13,12 @@
       "components": {
         "1": {
           "type": "Light"
+        },
+        "2": {
+          "type": "Light",
+          "positionX": 1,
+          "positionY": -1,
+          "positionX": 1
         }
       }
     }
