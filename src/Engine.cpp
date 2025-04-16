@@ -48,7 +48,6 @@ Engine::Engine() {
 
     // Create Shader program
     shaderProgram = std::make_shared<Shader>("shaders/vertex/vertex.glsl", "shaders/fragment/fragment.glsl");
-    std::cout << "made shader program" << std::endl;
     if (!shaderProgram->GetID()) {
         // SDL_GL_DeleteContext(glContext);
         SDL_DestroyWindow(Renderer::window);

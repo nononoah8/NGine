@@ -6,6 +6,10 @@ cube = {
   camAngleSpeed = 0.03,
   pos = Vector3(0, 0, 0),
   
+  OnStart = function(self)
+    Camera.SetPosition(0,0,0.5)
+  end,
+
   OnUpdate = function(self)
     local xPos = Camera.GetPositionX()
     local yPos = Camera.GetPositionY()

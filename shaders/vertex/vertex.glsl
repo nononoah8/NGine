@@ -2,14 +2,17 @@
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aColor;
 layout (location = 2) in vec3 aNormal;
+layout (location = 3) in vec2 aTexCoords;
 
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
+uniform bool hasTexture;
 
 out vec3 ourColor;
 out vec3 fragPos;
 out vec3 Normal;
+out vec2 TexCoords;
 
 void main() {
     // Apply all three transformation matrices in the correct order
@@ -24,4 +27,7 @@ void main() {
 
     // Pass color to fragment shader
     ourColor = aColor;
+
+    // Pass texture coords to frag shader
+    TexCoords = hasTexture ? aTexCoords : vec2(0.0, 0.0);
 }

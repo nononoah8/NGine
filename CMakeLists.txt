@@ -43,6 +43,7 @@ link_directories(
     ${CMAKE_SOURCE_DIR}/lib/SDL2
     ${CMAKE_SOURCE_DIR}/lib/SDL2_Mixer
     ${CMAKE_SOURCE_DIR}/lib/SDL2_ttf
+    ${CMAKE_SOURCE_DIR}/lib/assimp
 )
 
 if(APPLE)
@@ -58,12 +59,16 @@ if(APPLE)
     find_library(SDL2_LIBRARY NAMES SDL2 PATHS ${CMAKE_SOURCE_DIR}/lib/SDL2/lib)
     find_library(SDL2_MIXER_LIBRARY NAMES SDL2_mixer PATHS ${CMAKE_SOURCE_DIR}/lib/SDL2_Mixer/lib)
     find_library(SDL2_TTF_LIBRARY NAMES SDL2_ttf PATHS ${CMAKE_SOURCE_DIR}/lib/SDL2_ttf/lib)
+    
+    # Link Assimp library
+    find_library(ASSIMP_LIBRARY NAMES libassimp.5.4.1.dylib libassimp.5.dylib libassimp.dylib PATHS ${CMAKE_SOURCE_DIR}/lib/assimp)
 
     # Add SDL libraries to the target
     target_link_libraries(app 
         ${SDL2_LIBRARY}
         ${SDL2_MIXER_LIBRARY}
         ${SDL2_TTF_LIBRARY}
+        ${ASSIMP_LIBRARY}
     )
 
     # Link OpenGL

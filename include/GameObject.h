@@ -16,12 +16,7 @@ public:
     isActive(true),
     mesh(nullptr),
     name(""),
-    material({
-      glm::vec3(0.1f),
-      glm::vec3(0.8f),
-      glm::vec3(0.5f),
-      32.0f
-    }) {}
+    material(Material()) {}
 
   // Core properties
   glm::vec3 position;
@@ -37,6 +32,20 @@ public:
     glm::vec3 diffuse;
     glm::vec3 specular;
     float shininess;
+
+    unsigned int diffuseMap;
+    unsigned int specularMap;
+    bool useTexture;
+
+    // Constructor with default values
+    Material() : 
+        ambient(glm::vec3(0.1f)),
+        diffuse(glm::vec3(0.8f)),
+        specular(glm::vec3(0.5f)),
+        shininess(32.0f),
+        diffuseMap(UINT_MAX),
+        specularMap(UINT_MAX),
+        useTexture(false) {}
   };
 
   Material material;
@@ -75,6 +84,20 @@ public:
     material.diffuse = color * 0.9f;
     material.specular = glm::vec3(value);
     material.shininess = 16.0f;
+  }
+
+  // Add these methods to GameObject class
+  void SetDiffuseTexture(unsigned int textureId) {
+    material.diffuseMap = textureId;
+    material.useTexture = true;
+  }
+
+  void SetSpecularTexture(unsigned int textureId) {
+    material.specularMap = textureId;
+  }
+
+  void DisableTextures() {
+    material.useTexture = false;
   }
 private:
 };

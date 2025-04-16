@@ -36,13 +36,86 @@ Mesh::Mesh(const std::vector<float>& vertices, const std::vector<unsigned int>& 
   glBindVertexArray(0);
 }
 
+// Constructor for textured meshes
+Mesh::Mesh(const std::vector<float>& vertices, const std::vector<unsigned int>& indices, const std::vector<Texture>& textures)
+    : vertices(vertices), indices(indices), textures(textures), vertexCount(vertices.size() / 11), indexCount(indices.size()), hasTextureCoords(true) {
+
+  // Create buffers
+  glGenVertexArrays(1, &VAO);
+  glGenBuffers(1, &VBO);
+  glGenBuffers(1, &EBO);
+
+  // Bind the VAO
+  glBindVertexArray(VAO);
+
+  // Bind and set the VBO/EBO (same as your current code)
+  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
+
+  int stride = 11 * sizeof(float);
+
+  // Position attribute
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*)0);
+  glEnableVertexAttribArray(0);
+
+  // Color attribute
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)(3 * sizeof(float)));
+  glEnableVertexAttribArray(1);
+
+  // Normal attribute
+  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, stride, (void*)(6 * sizeof(float)));
+  glEnableVertexAttribArray(2);
+
+  // Texture coordinate attribute
+  glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, stride, (void*)(9 * sizeof(float)));
+  glEnableVertexAttribArray(3);
+
+  // Unbind
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindVertexArray(0);
+}
+
 Mesh::~Mesh() {
   glDeleteVertexArrays(1, &VAO);
   glDeleteBuffers(1, &VBO);
   glDeleteBuffers(1, &EBO);
 }
 
-void Mesh::Draw() const {
+void Mesh::Draw(unsigned int shaderProgram) const {
+  // Bind textures if we have them
+  if (hasTextureCoords && !textures.empty()) {
+    unsigned int diffuseNr = 1;
+    unsigned int specularNr = 1;
+    
+    for (unsigned int i = 0; i < textures.size(); i++) {
+      // Activate texture unit
+      glActiveTexture(GL_TEXTURE0 + i);
+      
+      // Get the texture number and type
+      std::string number;
+      std::string name = textures[i].type;
+      
+      if (name == "texture_diffuse")
+        number = std::to_string(diffuseNr++);
+      else if (name == "texture_specular")
+        number = std::to_string(specularNr++);
+        
+      // Set the sampler uniform
+      std::string uniformName = name + number;
+      glUniform1i(glGetUniformLocation(shaderProgram, uniformName.c_str()), i);
+      
+      // Bind texture
+      glBindTexture(GL_TEXTURE_2D, textures[i].id);
+    }
+    
+    // Reset active texture
+    glActiveTexture(GL_TEXTURE0);
+  }
+  
+  // Draw the mesh
   glBindVertexArray(VAO);
   glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
   glBindVertexArray(0);

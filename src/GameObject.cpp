@@ -28,11 +28,34 @@ void GameObject::Draw(GLuint shaderProgram, GLint modelLoc) {
   glUniform3fv(glGetUniformLocation(shaderProgram, "material.specular"), 1, glm::value_ptr(material.specular));
   glUniform1f(glGetUniformLocation(shaderProgram, "material.shininess"), material.shininess);
   
+  // Set texture usage flag
+  glUniform1i(glGetUniformLocation(shaderProgram, "material.useTexture"), material.useTexture);
+
+  if (material.useTexture) {
+    // Activate texture units
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, material.diffuseMap);
+    glUniform1i(glGetUniformLocation(shaderProgram, "material.diffuseMap"), 0);
+    
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, material.specularMap);
+    glUniform1i(glGetUniformLocation(shaderProgram, "material.specularMap"), 1);
+  }
+
+
   // Set the color
   glUniform3fv(glGetUniformLocation(shaderProgram, "ourColor"), 1, glm::value_ptr(color));
   
   // Draw the mesh
-  mesh->Draw();
+  mesh->Draw(shaderProgram);
+
+  // Clean up by unbinding textures if we used them
+  if (material.useTexture) {
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, 0);
+  }
 }
 
 void GameObject::Update(float deltaTime) {
