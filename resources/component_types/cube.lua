@@ -93,7 +93,8 @@ cube = {
     -- Update camera position
     Camera.SetPosition(xPos, yPos, zPos)
 
-    Shape.DrawCube(0.1, self.pos)
-    Shape.DrawSphere(0.05, Vector3(0.8, 0.5, 0.0), 16, Vector3(z, x, y))
+    Model.DrawCube(0.1, self.pos)
+    Model.DrawSphere(0.05, Vector3(0.8, 0.5, 0.0), 16, Vector3(z, x, y))
+    Model.DrawModel("backpack", Vector3(1, 0, 0))
   end
 }

@@ -5,6 +5,7 @@
 #include <memory>
 #include <string>
 #include "Mesh.h"
+#include "Model.h"
 
 class GameObject {
 public:
@@ -25,6 +26,7 @@ public:
   glm::vec3 color;
   bool isActive = true;
   std::shared_ptr<Mesh> mesh;
+  std::shared_ptr<Model> model;
   std::string name;
 
   struct Material {
@@ -99,6 +101,8 @@ public:
   void DisableTextures() {
     material.useTexture = false;
   }
+
+  bool isModel = false;
 private:
 };
 

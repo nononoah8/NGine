@@ -37,6 +37,7 @@ public:
 private:
   static std::vector<std::shared_ptr<GameObject>> allGameObjects;
   static std::vector<std::shared_ptr<GameObject>> renderQueue;
+  static std::unordered_map<std::string, std::shared_ptr<GameObject>> gameObjectMap;
 };
 
 #endif // GAMEOBJECTDB_H

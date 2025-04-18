@@ -130,9 +130,10 @@ void ComponentDB::Init() {
     .endClass();
 
     luabridge::getGlobalNamespace(ComponentManager::lua_state)
-    .beginNamespace("Shape")
+    .beginNamespace("Model")
     .addFunction("DrawCube", &GameObjectDB::CreateCube)
     .addFunction("DrawSphere", &GameObjectDB::CreateSphere)
+    .addFunction("DrawModel", &GameObjectDB::LoadModel)
     .endNamespace();
 
     luabridge::getGlobalNamespace(ComponentManager::lua_state)

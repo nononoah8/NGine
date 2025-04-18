@@ -1,5 +1,6 @@
 #include "Model.h"
 
+#define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
 
 #include <iostream>
@@ -21,7 +22,13 @@ void Model::LoadModel(std::string& path) {
     return;
   }
 
-  directory = path.substr(0, path.find_last_of('/'));
+  size_t lastSlash = path.find_last_of("/\\");
+  if (lastSlash != std::string::npos) {
+    directory = path.substr(0, lastSlash);
+  } else {
+    // No slashes found - assume current directory
+    directory = ".";
+  }
 
   ProcessNode(scene->mRootNode, scene);
 }
@@ -47,7 +54,7 @@ std::shared_ptr<Mesh> Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
   // Reserve space for efficiency
   vertices.reserve(mesh->mNumVertices * 11);
 
-  for(unsigned int i = 0; i < mesh->mNumVertices * 11; ++i) {
+  for(unsigned int i = 0; i < mesh->mNumVertices; ++i) {
     // Create a vertex
     Vertex vertex;
 
@@ -135,7 +142,6 @@ std::vector<Texture> Model::LoadMaterialTextures(aiMaterial* mat, aiTextureType 
       if(std::strcmp(texturesLoaded[j].path.data(), str.C_Str()) == 0) {
         textures.push_back(texturesLoaded[j]);
         skip = true; 
-        // a texture with the same filepath has already been loaded, continue to next one. (optimization)
         break;
       }
     }
@@ -147,7 +153,6 @@ std::vector<Texture> Model::LoadMaterialTextures(aiMaterial* mat, aiTextureType 
       texture.type = typeName;
       texture.path = str.C_Str();
       textures.push_back(texture);
-      // store it as texture loaded for entire model, to ensure we won't unnecessary load duplicate textures.
       texturesLoaded.push_back(texture);
     }
   }
@@ -158,7 +163,7 @@ std::vector<Texture> Model::LoadMaterialTextures(aiMaterial* mat, aiTextureType 
 
 unsigned int TextureFromFile(const char *path, const std::string &directory, bool gamma) {
   std::string filename = std::string(path);
-  filename = directory + '/' + filename;
+  filename = directory + "/" + filename;
 
   unsigned int textureID;
   glGenTextures(1, &textureID);

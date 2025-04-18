@@ -2,6 +2,7 @@
 #define MESH_H
 
 #include <vector>
+#include <string>
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 
@@ -26,6 +27,8 @@ struct Material {
 
 class Mesh {
 private:
+
+public:
   GLuint VAO, VBO, EBO;
   std::vector<float> vertices;
   std::vector<unsigned int> indices;
@@ -33,7 +36,6 @@ private:
   unsigned int vertexCount, indexCount;
   bool hasTextureCoords;
 
-public:
   Mesh(const std::vector<float>& vertices, const std::vector<unsigned int>& indices);
   Mesh(const std::vector<float>& vertices, const std::vector<unsigned int>& indices, const std::vector<Texture>& textures);
 

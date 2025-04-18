@@ -8,6 +8,7 @@
 
 #include "Shapes/Cube.h"
 #include "Shapes/Sphere.h"
+#include "Model.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -50,8 +51,13 @@ void GameObject::Draw(GLuint shaderProgram, GLint modelLoc) {
   // Set the color
   glUniform3fv(glGetUniformLocation(shaderProgram, "ourColor"), 1, glm::value_ptr(color));
   
-  // Draw the mesh
-  mesh->Draw(shaderProgram);
+  // Draw the mesh/model
+  if(isModel) {
+    std::cout << "drawing model at: " << "x: " << position.x << ", y: " << position.y << std::endl;
+    this->model->Draw(shaderProgram);
+  }else {
+    mesh->Draw(shaderProgram);
+  }
 
   // Clean up by unbinding textures if we used them
   if (material.useTexture) {
@@ -95,9 +101,42 @@ std::shared_ptr<GameObject> GameObject::CreateSphere(float radius, glm::vec3 col
   return gameObject;
 }
 
-std::shared_ptr<GameObject> GameObject::LoadModel(const std::string& path) {
+std::shared_ptr<GameObject> GameObject::LoadModel(const std::string& name) {
   auto gameObject = std::make_shared<GameObject>();
-  // This would be implemented once you integrate Assimp
-  // gameObject->mesh = AssimpModelLoader::LoadModel(path);
+
+  std::string fp = "resources/models/" + name + "/scene.gltf";
+  
+  auto model = std::make_shared<Model>(fp);
+  gameObject->model = model;
+
+  // If model has meshes, use the first one for the GameObject
+  if (!model->meshes.empty()) {
+    gameObject->mesh = model->meshes[0];
+    
+    // Set default material properties based on the model's textures
+    if (!model->meshes[0]->textures.empty()) {
+      gameObject->material.useTexture = true;
+      
+      // Find diffuse and specular maps if they exist
+      for (const auto& texture : model->meshes[0]->textures) {
+        if (texture.type == "texture_diffuse") {
+          gameObject->material.diffuseMap = texture.id;
+        }
+        else if (texture.type == "texture_specular") {
+          gameObject->material.specularMap = texture.id;
+        }
+      }
+      
+      // Set material properties
+      gameObject->material.ambient = glm::vec3(0.2f, 0.2f, 0.2f);
+      gameObject->material.diffuse = glm::vec3(0.8f, 0.8f, 0.8f);
+      gameObject->material.specular = glm::vec3(0.5f, 0.5f, 0.5f);
+      gameObject->material.shininess = 32.0f;
+    }
+  }
+  else {
+    std::cerr << "Warning: Model loaded but contains no meshes: " << fp << std::endl;
+  }
+
   return gameObject;
 }

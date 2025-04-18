@@ -9,6 +9,7 @@
 // Static member initialization
 std::vector<std::shared_ptr<GameObject>> GameObjectDB::allGameObjects;
 std::vector<std::shared_ptr<GameObject>> GameObjectDB::renderQueue;
+std::unordered_map<std::string, std::shared_ptr<GameObject>> GameObjectDB::gameObjectMap;
 
 void GameObjectDB::Init() {
   // Clear any existing objects
@@ -41,12 +42,23 @@ std::shared_ptr<GameObject> GameObjectDB::CreateSphere(float radius, const glm::
   return gameObject;
 }
 
-std::shared_ptr<GameObject> GameObjectDB::LoadModel(const std::string& path, const glm::vec3& position) {
-  auto gameObject = GameObject::LoadModel(path);
-  gameObject->position = position;
-  
-  allGameObjects.push_back(gameObject);
-  return gameObject;
+std::shared_ptr<GameObject> GameObjectDB::LoadModel(const std::string& name, const glm::vec3& position) {
+  if(gameObjectMap.find(name) != gameObjectMap.end()) {
+    auto gameObject = gameObjectMap[name];
+    gameObject->position = position;
+    gameObject->isModel = true;
+
+    allGameObjects.push_back(gameObject);
+    return gameObject;
+  }else {
+    auto gameObject = GameObject::LoadModel(name);
+    gameObjectMap[name] = gameObject;
+    gameObject->position = position;
+    gameObject->isModel = true;
+    
+    allGameObjects.push_back(gameObject);
+    return gameObject;
+  }
 }
 
 void GameObjectDB::RenderAndClearObjects(GLuint shaderProgram, GLint modelLoc) {

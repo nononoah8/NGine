@@ -94,6 +94,7 @@ elseif(WIN32)
     find_library(SDL2_MAIN_LIBRARY NAMES SDL2main.lib PATHS ${CMAKE_SOURCE_DIR}/lib/SDL2/lib)
     find_library(SDL2_MIXER_LIBRARY NAMES SDL2_mixer.lib PATHS ${CMAKE_SOURCE_DIR}/lib/SDL2_Mixer/lib)
     find_library(SDL2_TTF_LIBRARY NAMES SDL2_ttf.lib PATHS ${CMAKE_SOURCE_DIR}/lib/SDL2_ttf/lib)
+    find_library(ASSIMP_LIBRARY NAMES assimp-vc143-mt.lib PATHS ${CMAKE_SOURCE_DIR}/lib/assimp)
 
     # Add SDL libraries to the target
     target_link_libraries(app 
@@ -101,6 +102,7 @@ elseif(WIN32)
         ${SDL2_MAIN_LIBRARY}
         ${SDL2_MIXER_LIBRARY}
         ${SDL2_TTF_LIBRARY}
+        ${ASSIMP_LIBRARY}
     )
 
     # Link OpenGL
@@ -113,6 +115,9 @@ elseif(WIN32)
         ${CMAKE_SOURCE_DIR}/dlls/SDL2.dll
         ${CMAKE_SOURCE_DIR}/dlls/SDL2_mixer.dll
         ${CMAKE_SOURCE_DIR}/dlls/SDL2_ttf.dll
+        ${CMAKE_SOURCE_DIR}/dlls/assimp-vc143-mt.dll
+        ${CMAKE_SOURCE_DIR}/dlls/D3DCompiler_42.dll
+        ${CMAKE_SOURCE_DIR}/dlls/D3DX9_42.dll      
     )
 
     foreach(DLL ${DLLS})
