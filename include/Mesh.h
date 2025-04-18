@@ -14,6 +14,7 @@ struct Vertex {
 struct Texture {
   unsigned int id;
   std::string type;
+  std::string path;
 };
 
 struct Material {
@@ -35,7 +36,7 @@ private:
 public:
   Mesh(const std::vector<float>& vertices, const std::vector<unsigned int>& indices);
   Mesh(const std::vector<float>& vertices, const std::vector<unsigned int>& indices, const std::vector<Texture>& textures);
-       
+
   ~Mesh();
 
   void Draw(unsigned int shaderProgram) const;

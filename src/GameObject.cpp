@@ -9,6 +9,10 @@
 #include "Shapes/Cube.h"
 #include "Shapes/Sphere.h"
 
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+
 void GameObject::Draw(GLuint shaderProgram, GLint modelLoc) {
   if (!isActive || !mesh) return;
 
