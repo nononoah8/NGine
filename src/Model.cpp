@@ -126,24 +126,31 @@ std::shared_ptr<Mesh> Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
 
 std::vector<Texture> Model::LoadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName) {
   std::vector<Texture> textures;
-
-  for(unsigned int i = 0; i < mat->GetTextureCount(type); ++i) {
+  for(unsigned int i = 0; i < mat->GetTextureCount(type); i++) {
     aiString str;
     mat->GetTexture(type, i, &str);
-    
-    // Check if texture was loaded before
+    // check if texture was loaded before and if so, continue to next iteration: skip loading a new texture
     bool skip = false;
-    for(unsigned int i = 0; i < mat->GetTextureCount(type); i++) {
-      aiString str;
-      mat->GetTexture(type, i, &str);
+    for(unsigned int j = 0; j < texturesLoaded.size(); j++) {
+      if(std::strcmp(texturesLoaded[j].path.data(), str.C_Str()) == 0) {
+        textures.push_back(texturesLoaded[j]);
+        skip = true; 
+        // a texture with the same filepath has already been loaded, continue to next one. (optimization)
+        break;
+      }
+    }
+
+    // if texture hasn't been loaded already, load it
+    if(!skip) {
       Texture texture;
       texture.id = TextureFromFile(str.C_Str(), directory);
       texture.type = typeName;
-      texture.path = std::string(str.C_Str());
+      texture.path = str.C_Str();
       textures.push_back(texture);
+      // store it as texture loaded for entire model, to ensure we won't unnecessary load duplicate textures.
+      texturesLoaded.push_back(texture);
     }
   }
-
   return textures;
 }
 
