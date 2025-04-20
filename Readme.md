@@ -23,11 +23,9 @@ In order to create a game, you must have a resources folder in the root of the e
     ├── actor_templates
     │   └── Chair.template
     ├── audio
-    │   └── GameMusic.mp3
+    │   └── GameMusic.wav
     ├── component_types
     │   └── GameScript.lua
-    ├── fonts
-    │   └── BasicFont.ttf
     ├── models
     │   └── chair
     │       ├── chair.obj
@@ -103,7 +101,8 @@ start Debug/app.exe
 ```
 
 ### MacOS
-```cmake .
+```
+cmake .
 make
 ./Debug/app
 ```
