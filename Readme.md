@@ -1,4 +1,4 @@
-# 3D Engine
+# 3D NGine
 
 A modern, lightweight 3D rendering engine with component architecture and Lua scripting integration.
 
