@@ -102,6 +102,7 @@ void ComponentDB::Init() {
     luabridge::getGlobalNamespace(ComponentManager::lua_state)
     .beginNamespace("Camera")
     .addFunction("SetPosition", &Renderer::SetCamPos)
+    .addFunction("GetPosition", &Renderer::GetCamPos)
     .addFunction("GetPositionX", &Renderer::GetCamPosX)
     .addFunction("GetPositionY", &Renderer::GetCamPosY)
     .addFunction("GetPositionZ", &Renderer::GetCamPosZ)

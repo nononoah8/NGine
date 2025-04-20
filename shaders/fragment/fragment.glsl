@@ -52,6 +52,8 @@ uniform Material material;
 uniform vec3 viewPos;
 uniform int numLights;
 uniform Light lights[MAX_LIGHTS];
+uniform sampler2D texture_diffuse1;
+uniform sampler2D texture_specular1;
 
 // Calculate lighting for directional light
 vec3 CalcDirectionalLight(Light light, vec3 normal, vec3 viewDir, vec3 diffuseValue, vec3 specularValue) {
@@ -167,9 +169,25 @@ void main() {
 
     vec3 diffuseValue;
     vec3 specularValue;
+    bool useDiffuseTex = false;
 
-    if (material.useTexture) {
-        // Use texture values
+    // First check if we should use the standalone texture_diffuse1
+    if (textureSize(texture_diffuse1, 0).x > 1) {
+        // Valid texture in texture_diffuse1, use it
+        diffuseValue = vec3(texture(texture_diffuse1, TexCoords));
+        
+        // Check if we have a valid specular texture too
+        if (textureSize(texture_specular1, 0).x > 1) {
+            // Use the specular map if available
+            specularValue = vec3(texture(texture_specular1, TexCoords));
+        } else {
+            // Fall back to default specular
+            specularValue = vec3(0.5);
+        }
+        
+        useDiffuseTex = true;
+    } else if (material.useTexture) {
+        // Use texture values from material
         diffuseValue = vec3(texture(material.diffuseMap, TexCoords));
         specularValue = vec3(texture(material.specularMap, TexCoords));
     } else {
@@ -199,8 +217,18 @@ void main() {
     }
 
     // Combine lighting with base color
-    vec3 baseColor = material.useTexture ? vec3(1.0) : ourColor;
+    // vec3 baseColor = material.useTexture ? vec3(1.0) : ourColor;
+    vec3 baseColor;
+    if (useDiffuseTex) {
+        // For textured objects, blend with object color
+        baseColor = diffuseValue * ourColor;
+    } else {
+        // For non-textured objects, just use object color
+        baseColor = ourColor;
+    }
     vec3 result = totalLighting * baseColor;
+
+    result = result / (result + vec3(1.0));
 
     // Output to screen
     FragColor = vec4(result, 1.0);

@@ -1,7 +1,9 @@
 #include "Mesh.h"
 
+#include <glm/gtc/type_ptr.hpp>
+
 Mesh::Mesh(const std::vector<float>& vertices, const std::vector<unsigned int>& indices)
-  : vertices(vertices), indices(indices), vertexCount(vertices.size() / 6), indexCount(indices.size()) {
+  : vertices(vertices), indices(indices), vertexCount(vertices.size() / 9), indexCount(indices.size()) {
   
   // Create buffers
   glGenVertexArrays(1, &VAO);
@@ -37,7 +39,7 @@ Mesh::Mesh(const std::vector<float>& vertices, const std::vector<unsigned int>& 
 }
 
 // Constructor for textured meshes
-Mesh::Mesh(const std::vector<float>& vertices, const std::vector<unsigned int>& indices, const std::vector<Texture>& textures)
+Mesh::Mesh(const std::vector<float>& vertices, const std::vector<unsigned int>& indices, const std::vector<Texture>& textures, Material material)
     : vertices(vertices), indices(indices), textures(textures), vertexCount(vertices.size() / 11), indexCount(indices.size()), hasTextureCoords(true) {
 
   // Create buffers
@@ -76,6 +78,8 @@ Mesh::Mesh(const std::vector<float>& vertices, const std::vector<unsigned int>& 
   // Unbind
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
+
+  this->material = material;
 }
 
 Mesh::~Mesh() {
@@ -85,79 +89,57 @@ Mesh::~Mesh() {
 }
 
 void Mesh::Draw(unsigned int shaderProgram) const {
-  // Bind textures if we have them
-  if (hasTextureCoords && !textures.empty()) {
-    unsigned int diffuseNr = 1;
-    unsigned int specularNr = 1;
-    
-    for (unsigned int i = 0; i < textures.size(); i++) {
-      // Activate texture unit
-      glActiveTexture(GL_TEXTURE0 + i);
+  // Set material properties
+  glUniform3fv(glGetUniformLocation(shaderProgram, "material.ambient"), 1, glm::value_ptr(material.ambient));
+  glUniform3fv(glGetUniformLocation(shaderProgram, "material.diffuse"), 1, glm::value_ptr(material.diffuse));
+  glUniform3fv(glGetUniformLocation(shaderProgram, "material.specular"), 1, glm::value_ptr(material.specular));
+  glUniform1f(glGetUniformLocation(shaderProgram, "material.shininess"), material.shininess);
+  glUniform1i(glGetUniformLocation(shaderProgram, "material.useTexture"), material.useTexture);
+
+  // Handle textures based on what's available
+  if (material.useTexture) {
+    if (!textures.empty()) {
+      // Use textures from the textures array (for models)
+      unsigned int diffuseNr = 1;
+      unsigned int specularNr = 1;
       
-      // Get the texture number and type
-      std::string number;
-      std::string name = textures[i].type;
-      
-      if (name == "texture_diffuse")
-        number = std::to_string(diffuseNr++);
-      else if (name == "texture_specular")
-        number = std::to_string(specularNr++);
+      for (unsigned int i = 0; i < textures.size(); i++) {
+        glActiveTexture(GL_TEXTURE0 + i);
+        std::string number;
+        std::string name = textures[i].type;
         
-      // Set the sampler uniform
-      std::string uniformName = name + number;
-      glUniform1i(glGetUniformLocation(shaderProgram, uniformName.c_str()), i);
+        if (name == "texture_diffuse")
+          number = std::to_string(diffuseNr++);
+        else if (name == "texture_specular")
+          number = std::to_string(specularNr++);
+          
+        std::string uniformName = name + number;
+        glUniform1i(glGetUniformLocation(shaderProgram, uniformName.c_str()), i);
+        glBindTexture(GL_TEXTURE_2D, textures[i].id);
+      }
+    } 
+    else {
+      // Use material.diffuseMap and material.specularMap
+      glActiveTexture(GL_TEXTURE0);
+      glBindTexture(GL_TEXTURE_2D, material.diffuseMap);
+      glUniform1i(glGetUniformLocation(shaderProgram, "material.diffuseMap"), 0);
       
-      // Bind texture
-      glBindTexture(GL_TEXTURE_2D, textures[i].id);
+      glActiveTexture(GL_TEXTURE1);
+      glBindTexture(GL_TEXTURE_2D, material.specularMap);
+      glUniform1i(glGetUniformLocation(shaderProgram, "material.specularMap"), 1);
     }
-    
-    // Reset active texture
-    glActiveTexture(GL_TEXTURE0);
   }
-  
+
   // Draw the mesh
   glBindVertexArray(VAO);
   glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
   glBindVertexArray(0);
-}
-
-// Move constructor
-Mesh::Mesh(Mesh&& other) noexcept
-  : vertices(std::move(other.vertices)),
-    indices(std::move(other.indices)),
-    vertexCount(other.vertexCount),
-    indexCount(other.indexCount),
-    VAO(other.VAO),
-    VBO(other.VBO),
-    EBO(other.EBO) {
   
-  // Invalidate other's handles
-  other.VAO = 0;
-  other.VBO = 0;
-  other.EBO = 0;
-}
-
-// Move assignment operator
-Mesh& Mesh::operator=(Mesh&& other) noexcept {
-  if (this != &other) {
-    // Free current resources
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
-    
-    // Transfer ownership
-    vertices = std::move(other.vertices);
-    indices = std::move(other.indices);
-    vertexCount = other.vertexCount;
-    indexCount = other.indexCount;
-    VAO = other.VAO;
-    VBO = other.VBO;
-    EBO = other.EBO;
-    
-    // Invalidate other's handles
-    other.VAO = 0;
-    other.VBO = 0;
-    other.EBO = 0;
+  // Clean up textures
+  if (material.useTexture) {
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, 0);
   }
-  return *this;
 }

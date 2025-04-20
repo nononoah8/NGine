@@ -2,7 +2,7 @@ cube = {
   -- Variables to track animation
   radius = 0.1,
   speed = 0.0003, -- rotation amount per frame
-  camMoveSpeed = 0.0005,
+  camMoveSpeed = 0.01,
   camAngleSpeed = 0.03,
   pos = Vector3(0, 0, 0),
   
@@ -25,8 +25,6 @@ cube = {
     local x = self.radius
     local z = self.radius
     local y = self.radius
-    
-    -- Draw the cube at the calculated position (size 0.1)
 
     -- Forward/backward movement
     if Input.GetKey("w") then
@@ -95,6 +93,11 @@ cube = {
 
     Model.DrawCube(0.1, self.pos)
     Model.DrawSphere(0.05, Vector3(0.8, 0.5, 0.0), 16, Vector3(z, x, y))
-    Model.DrawModel("backpack", Vector3(1, 0, 0))
+    Model.DrawModel("tree", Vector3(1, 0, 0))
+
+    if Application.GetFrame() % 1000 == 0 then
+      local pos = Camera.GetPosition()
+      Debug.Log("x: " .. pos.x .. ", y: " .. pos.y .. ", z: " .. pos.z)
+    end
   end
 }

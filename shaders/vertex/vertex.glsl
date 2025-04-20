@@ -7,7 +7,6 @@ layout (location = 3) in vec2 aTexCoords;
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
-uniform bool hasTexture;
 
 out vec3 ourColor;
 out vec3 fragPos;
@@ -23,11 +22,12 @@ void main() {
 
     // Transform normals to world space using normal matrix
     // This handles non-uniform scaling correctly
-    Normal = mat3(transpose(inverse(model))) * aNormal;
+    // Normal = mat3(transpose(inverse(model))) * aNormal;
+    Normal = aNormal;
 
     // Pass color to fragment shader
     ourColor = aColor;
 
     // Pass texture coords to frag shader
-    TexCoords = hasTexture ? aTexCoords : vec2(0.0, 0.0);
+    TexCoords = aTexCoords;
 }

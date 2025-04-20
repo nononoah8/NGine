@@ -50,6 +50,7 @@ std::shared_ptr<Mesh> Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
   std::vector<unsigned int> indices;
   std::vector<Texture> textures;
   std::vector<float> vertexData;
+  Material meshMaterial;
 
   // Reserve space for efficiency
   vertices.reserve(mesh->mNumVertices * 11);
@@ -96,13 +97,36 @@ std::shared_ptr<Mesh> Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
   if(mesh->mMaterialIndex >= 0) {
     aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
-    // Load diffuse texture(s)
+    // Extract material properties (MTL values)
+    aiColor3D ambient(0.2f, 0.2f, 0.2f); // Default value (Ka)
+    if(material->Get(AI_MATKEY_COLOR_AMBIENT, ambient) == AI_SUCCESS) {
+      meshMaterial.ambient = glm::vec3(ambient.r, ambient.g, ambient.b);
+    }
+
+    aiColor3D diffuse(0.8f, 0.8f, 0.8f); // Default value (Kd)
+    if(material->Get(AI_MATKEY_COLOR_DIFFUSE, diffuse) == AI_SUCCESS) {
+      meshMaterial.diffuse = glm::vec3(diffuse.r, diffuse.g, diffuse.b);
+    }
+
+    aiColor3D specular(0.5f, 0.5f, 0.5f); // Default value (Ks)
+    if(material->Get(AI_MATKEY_COLOR_SPECULAR, specular) == AI_SUCCESS) {
+      meshMaterial.specular = glm::vec3(specular.r, specular.g, specular.b);
+    }
+
+    float shininess = 32.0f; // Default value (Ns)
+    if(material->Get(AI_MATKEY_SHININESS, shininess) == AI_SUCCESS) {
+      meshMaterial.shininess = shininess;
+    }
+
+    // Load textures as before
     std::vector<Texture> diffuseMaps = LoadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
     textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 
-    // Load specular textures
     std::vector<Texture> specularMaps = LoadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
     textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+
+    // Set useTexture flag based on whether we loaded any textures
+    meshMaterial.useTexture = !textures.empty();
   }
 
   vertexData.reserve(vertices.size() * 11);  // 11 floats per vertex
@@ -128,7 +152,7 @@ std::shared_ptr<Mesh> Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
     vertexData.push_back(vertex.texCoords.y);
   }
   
-  return std::make_shared<Mesh>(vertexData, indices, textures);
+  return std::make_shared<Mesh>(vertexData, indices, textures, meshMaterial);
 }
 
 std::vector<Texture> Model::LoadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName) {

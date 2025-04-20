@@ -29,27 +29,6 @@ public:
   std::shared_ptr<Model> model;
   std::string name;
 
-  struct Material {
-    glm::vec3 ambient;
-    glm::vec3 diffuse;
-    glm::vec3 specular;
-    float shininess;
-
-    unsigned int diffuseMap;
-    unsigned int specularMap;
-    bool useTexture;
-
-    // Constructor with default values
-    Material() : 
-        ambient(glm::vec3(0.1f)),
-        diffuse(glm::vec3(0.8f)),
-        specular(glm::vec3(0.5f)),
-        shininess(32.0f),
-        diffuseMap(UINT_MAX),
-        specularMap(UINT_MAX),
-        useTexture(false) {}
-  };
-
   Material material;
 
   // Core methods

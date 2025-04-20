@@ -17,6 +17,7 @@
 void GameObject::Draw(GLuint shaderProgram, GLint modelLoc) {
   if (!isActive || !mesh) return;
 
+  // Set up model matrix
   glm::mat4 model = glm::mat4(1.0f);
   model = glm::translate(model, position);
   model = glm::rotate(model, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -26,45 +27,17 @@ void GameObject::Draw(GLuint shaderProgram, GLint modelLoc) {
   
   // Pass model matrix to shader
   glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-  
-  // Set material properties
-  glUniform3fv(glGetUniformLocation(shaderProgram, "material.ambient"), 1, glm::value_ptr(material.ambient));
-  glUniform3fv(glGetUniformLocation(shaderProgram, "material.diffuse"), 1, glm::value_ptr(material.diffuse));
-  glUniform3fv(glGetUniformLocation(shaderProgram, "material.specular"), 1, glm::value_ptr(material.specular));
-  glUniform1f(glGetUniformLocation(shaderProgram, "material.shininess"), material.shininess);
-  
-  // Set texture usage flag
-  glUniform1i(glGetUniformLocation(shaderProgram, "material.useTexture"), material.useTexture);
 
-  if (material.useTexture) {
-    // Activate texture units
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, material.diffuseMap);
-    glUniform1i(glGetUniformLocation(shaderProgram, "material.diffuseMap"), 0);
-    
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, material.specularMap);
-    glUniform1i(glGetUniformLocation(shaderProgram, "material.specularMap"), 1);
-  }
-
-
-  // Set the color
+  // Set the vertex color
   glUniform3fv(glGetUniformLocation(shaderProgram, "ourColor"), 1, glm::value_ptr(color));
   
-  // Draw the mesh/model
+  // For models, we let each mesh handle its own materials
   if(isModel) {
-    std::cout << "drawing model at: " << "x: " << position.x << ", y: " << position.y << std::endl;
     this->model->Draw(shaderProgram);
-  }else {
+  } else {
+    // For basic shapes, transfer the GameObject material to the mesh
+    mesh->material = material;
     mesh->Draw(shaderProgram);
-  }
-
-  // Clean up by unbinding textures if we used them
-  if (material.useTexture) {
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, 0);
   }
 }
 
@@ -104,7 +77,7 @@ std::shared_ptr<GameObject> GameObject::CreateSphere(float radius, glm::vec3 col
 std::shared_ptr<GameObject> GameObject::LoadModel(const std::string& name) {
   auto gameObject = std::make_shared<GameObject>();
 
-  std::string fp = "resources/models/" + name + "/scene.gltf";
+  std::string fp = "resources/models/" + name + "/" + name + ".obj";
   
   auto model = std::make_shared<Model>(fp);
   gameObject->model = model;
