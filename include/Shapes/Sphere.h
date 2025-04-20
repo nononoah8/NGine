@@ -1,10 +1,16 @@
 #ifndef SPHERE_H
 #define SPHERE_H
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
+
+
 #include "Mesh.h"
+#include <cmath>
 #include <vector>
 #include <memory>
-#include <cmath>
 #include <glm/glm.hpp>
 
 namespace Shape {
@@ -44,6 +50,15 @@ namespace Shape {
             vertices.push_back(color.r);
             vertices.push_back(color.g);
             vertices.push_back(color.b);
+
+            // Normal
+            float normalX = xPos / radius;
+            float normalY = yPos / radius;
+            float normalZ = zPos / radius;
+
+            vertices.push_back(normalX);
+            vertices.push_back(normalY);
+            vertices.push_back(normalZ);
           }
         }
 

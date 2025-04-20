@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.16)
 project(main)
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Wall -fdiagnostics-color=always")
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fdiagnostics-color=always")
 
 # Set Debug as default build type if not specified
 if(NOT CMAKE_BUILD_TYPE)
@@ -18,24 +18,36 @@ file(GLOB_RECURSE SRC_FILES
     "${CMAKE_SOURCE_DIR}/src/*.cpp"
 )
 
+# If LuaBridge has .cpp files that need to be compiled
+file(GLOB_RECURSE LUABRIDGE_SRC_FILES 
+    "${CMAKE_SOURCE_DIR}/include/vendor/Lua/*.c"
+)
+
 # Define sources list
 set(SOURCES
     ${SRC_FILES}
-    ${CMAKE_SOURCE_DIR}/include/glad/glad.c
+    ${LUABRIDGE_SRC_FILES}
+    ${CMAKE_SOURCE_DIR}/include/vendor/glad/glad.c
+)
+
+include_directories(
+    ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/include/vendor
+    ${CMAKE_SOURCE_DIR}/lib
+    ${CMAKE_SOURCE_DIR}/lib/SDL2
+    ${CMAKE_SOURCE_DIR}/lib/SDL2_Mixer
+    ${CMAKE_SOURCE_DIR}/lib/SDL2_ttf
+)
+link_directories(
+    ${CMAKE_SOURCE_DIR}/lib/glfw
+    ${CMAKE_SOURCE_DIR}/lib/SDL2
+    ${CMAKE_SOURCE_DIR}/lib/SDL2_Mixer
+    ${CMAKE_SOURCE_DIR}/lib/SDL2_ttf
+    ${CMAKE_SOURCE_DIR}/lib/assimp
 )
 
 if(APPLE)
     # macOS-specific configuration
-    include_directories(
-        ${CMAKE_SOURCE_DIR}/include
-        ${CMAKE_SOURCE_DIR}/lib
-    )
-    link_directories(
-        ${CMAKE_SOURCE_DIR}/lib/glfw
-        ${CMAKE_SOURCE_DIR}/lib/SDL2
-        ${CMAKE_SOURCE_DIR}/lib/SDL2_Mixer
-        ${CMAKE_SOURCE_DIR}/lib/SDL2_ttf
-    )
 
     add_executable(app ${SOURCES})
 
@@ -47,12 +59,16 @@ if(APPLE)
     find_library(SDL2_LIBRARY NAMES SDL2 PATHS ${CMAKE_SOURCE_DIR}/lib/SDL2/lib)
     find_library(SDL2_MIXER_LIBRARY NAMES SDL2_mixer PATHS ${CMAKE_SOURCE_DIR}/lib/SDL2_Mixer/lib)
     find_library(SDL2_TTF_LIBRARY NAMES SDL2_ttf PATHS ${CMAKE_SOURCE_DIR}/lib/SDL2_ttf/lib)
+    
+    # Link Assimp library
+    find_library(ASSIMP_LIBRARY NAMES libassimp.5.4.1.dylib libassimp.5.dylib libassimp.dylib PATHS ${CMAKE_SOURCE_DIR}/lib/assimp)
 
     # Add SDL libraries to the target
     target_link_libraries(app 
         ${SDL2_LIBRARY}
         ${SDL2_MIXER_LIBRARY}
         ${SDL2_TTF_LIBRARY}
+        ${ASSIMP_LIBRARY}
     )
 
     # Link OpenGL
@@ -67,18 +83,6 @@ if(APPLE)
     target_link_libraries(app ${COCOA_LIBRARY} ${IOKIT_LIBRARY} ${COREVIDEO_LIBRARY} ${COREFOUNDATION_LIBRARY})
 
 elseif(WIN32)
-    # Windows-specific configuration
-    include_directories(
-        ${CMAKE_SOURCE_DIR}/include
-        ${CMAKE_SOURCE_DIR}/lib
-    )
-    link_directories(
-        ${CMAKE_SOURCE_DIR}/lib/glfw
-        ${CMAKE_SOURCE_DIR}/lib/SDL2
-        ${CMAKE_SOURCE_DIR}/lib/SDL2_Mixer
-        ${CMAKE_SOURCE_DIR}/lib/SDL2_ttf
-    )
-
     add_executable(app ${SOURCES})
 
     # Link GLFW
@@ -90,6 +94,7 @@ elseif(WIN32)
     find_library(SDL2_MAIN_LIBRARY NAMES SDL2main.lib PATHS ${CMAKE_SOURCE_DIR}/lib/SDL2/lib)
     find_library(SDL2_MIXER_LIBRARY NAMES SDL2_mixer.lib PATHS ${CMAKE_SOURCE_DIR}/lib/SDL2_Mixer/lib)
     find_library(SDL2_TTF_LIBRARY NAMES SDL2_ttf.lib PATHS ${CMAKE_SOURCE_DIR}/lib/SDL2_ttf/lib)
+    find_library(ASSIMP_LIBRARY NAMES assimp-vc143-mt.lib PATHS ${CMAKE_SOURCE_DIR}/lib/assimp)
 
     # Add SDL libraries to the target
     target_link_libraries(app 
@@ -97,6 +102,7 @@ elseif(WIN32)
         ${SDL2_MAIN_LIBRARY}
         ${SDL2_MIXER_LIBRARY}
         ${SDL2_TTF_LIBRARY}
+        ${ASSIMP_LIBRARY}
     )
 
     # Link OpenGL
@@ -109,6 +115,9 @@ elseif(WIN32)
         ${CMAKE_SOURCE_DIR}/dlls/SDL2.dll
         ${CMAKE_SOURCE_DIR}/dlls/SDL2_mixer.dll
         ${CMAKE_SOURCE_DIR}/dlls/SDL2_ttf.dll
+        ${CMAKE_SOURCE_DIR}/dlls/assimp-vc143-mt.dll
+        ${CMAKE_SOURCE_DIR}/dlls/D3DCompiler_42.dll
+        ${CMAKE_SOURCE_DIR}/dlls/D3DX9_42.dll      
     )
 
     foreach(DLL ${DLLS})
@@ -119,7 +128,3 @@ elseif(WIN32)
         )
     endforeach()
 endif()
-
-# Print some debugging information
-message(STATUS "Source files: ${SOURCES}")
-message(STATUS "Output directory: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}")

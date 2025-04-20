@@ -1,3 +1,0 @@
-/Users/noahdujovny/Documents/EECS/EECS498-007/3d_test/CMakeFiles/app.dir
-/Users/noahdujovny/Documents/EECS/EECS498-007/3d_test/CMakeFiles/edit_cache.dir
-/Users/noahdujovny/Documents/EECS/EECS498-007/3d_test/CMakeFiles/rebuild_cache.dir
