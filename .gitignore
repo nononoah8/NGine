@@ -24,7 +24,6 @@ Makefile
 # Ignore log files and temporary files
 *.log
 *.tmp
-*.obj
 *.pch
 *.idb
 *.ipch
