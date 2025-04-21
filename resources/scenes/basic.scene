@@ -19,7 +19,10 @@
           "positionX": 1,
           "positionY": -1,
           "positionX": 1,
-          "intensity": 10
+          "intensity": 10,
+          "colorR": 0.8,
+          "colorG": 0.5,
+          "colorB": 0.2
         }
       }
     }

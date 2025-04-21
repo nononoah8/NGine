@@ -23,10 +23,15 @@ file(GLOB_RECURSE LUABRIDGE_SRC_FILES
     "${CMAKE_SOURCE_DIR}/include/vendor/Lua/*.c"
 )
 
+file(GLOB_RECURSE IMGUI_SRC_FILES
+    "${CMAKE_SOURCE_DIR}/include/vendor/imgui/*.cpp"
+)
+
 # Define sources list
 set(SOURCES
     ${SRC_FILES}
     ${LUABRIDGE_SRC_FILES}
+    ${IMGUI_SRC_FILES}
     ${CMAKE_SOURCE_DIR}/include/vendor/glad/glad.c
 )
 

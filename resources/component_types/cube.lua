@@ -3,7 +3,7 @@ cube = {
   radius = 0.1,
   speed = 0.0003, -- rotation amount per frame
   camMoveSpeed = 0.01,
-  camAngleSpeed = 0.03,
+  camAngleSpeed = 0.07,
   pos = Vector3(0, 0, 0),
   
   OnStart = function(self)
@@ -94,10 +94,27 @@ cube = {
     -- Model.DrawCube(0.1, self.pos)
     -- Model.DrawSphere(0.05, Vector3(0.8, 0.5, 0.0), 16, Vector3(z, x, y))
     local scale = Vector3(0.1, 0.1, 0.1)
+    -- Original trees
     Model.DrawModel("tree", Vector3(1, -4.8, 0), scale)
     Model.DrawModel("tree", Vector3(0, -4.8, 2), scale)
     Model.DrawModel("tree", Vector3(2, -4.8, 1), scale)
     Model.DrawModel("tree", Vector3(4, -4.8, 2), scale)
+    
+    -- Additional trees
+    Model.DrawModel("tree", Vector3(-2, -4.8, -1), scale)
+    Model.DrawModel("tree", Vector3(-3, -4.8, 3), scale)
+    Model.DrawModel("tree", Vector3(-1, -4.8, 4), scale)
+    Model.DrawModel("tree", Vector3(3, -4.8, -2), scale)
+    Model.DrawModel("tree", Vector3(2, -4.8, -3), scale)
+    Model.DrawModel("tree", Vector3(-4, -4.8, 0), scale)
+    Model.DrawModel("tree", Vector3(0, -4.8, -3), scale)
+    Model.DrawModel("tree", Vector3(-2, -4.8, -4), scale)
+    Model.DrawModel("tree", Vector3(3, -4.8, 4), scale)
+    
+    -- Vary scale slightly for some trees to add variety
+    Model.DrawModel("tree", Vector3(-3, -4.8, -3), Vector3(0.12, 0.12, 0.12))
+    Model.DrawModel("tree", Vector3(4, -4.8, -1), Vector3(0.08, 0.08, 0.08))
+
 
     Model.DrawTexturedPlane("dirt.jpg", 10.0, 10.0, Vector3(0.5, 0.8, 0.5), Vector3(0, -5, 0))
   end

@@ -38,12 +38,9 @@ int main(int argc, char* argv[]) {
 
 /*
 Next steps:
-* Add some way to use textures on the shapes
-* Add a plane shape, and triangle shape too, add some 2d shapes
-* Can use https://github.com/assimp/assimp - assimp for asset importing for models and whatnot.
-* Add physics engine - https://github.com/jrouwe/JoltPhysics, https://github.com/NVIDIA-Omniverse/PhysX, https://github.com/bulletphysics/bullet3, etc.
-* Entity-Component system
-* Debugging framework
-* Paticle System
 * UI Framework (Dear ImGui)
+* Textures on cube/sphere and shapes
+* Skybox
+* Add physics engine - https://github.com/jrouwe/JoltPhysics, https://github.com/NVIDIA-Omniverse/PhysX, https://github.com/bulletphysics/bullet3, etc.
+* Paticle System
 */
