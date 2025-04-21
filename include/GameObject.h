@@ -42,6 +42,8 @@ public:
   static std::shared_ptr<GameObject> CreateCube(float size = 1.0f);
   static std::shared_ptr<GameObject> CreateSphere(float radius = 1.0f, glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f), int segments = 16);
   static std::shared_ptr<GameObject> LoadModel(const std::string& path);
+  static std::shared_ptr<GameObject> CreatePlane(float width = 1.0f, float length = 1.0f, glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f));
+  static std::shared_ptr<GameObject> CreateTexturedPlane(const std::string& texturePath, float width = 1.0f, float length = 1.0f, glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f));
 
   void SetPosition(glm::vec3 pos) { position = pos; }
   void SetPosition(float x, float y, float z) { position = glm::vec3(x, y, z); }

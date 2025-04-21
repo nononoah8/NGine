@@ -18,7 +18,8 @@
           "type": "Light",
           "positionX": 1,
           "positionY": -1,
-          "positionX": 1
+          "positionX": 1,
+          "intensity": 10
         }
       }
     }

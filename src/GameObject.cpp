@@ -8,11 +8,14 @@
 
 #include "Shapes/Cube.h"
 #include "Shapes/Sphere.h"
+#include "Shapes/Plane.h"
 #include "Model.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+
+unsigned int TextureFromFile(const char *path, const std::string &directory, bool gamma = false);
 
 void GameObject::Draw(GLuint shaderProgram, GLint modelLoc) {
   if (!isActive || !mesh) return;
@@ -110,6 +113,54 @@ std::shared_ptr<GameObject> GameObject::LoadModel(const std::string& name) {
   else {
     std::cerr << "Warning: Model loaded but contains no meshes: " << fp << std::endl;
   }
+
+  return gameObject;
+}
+
+std::shared_ptr<GameObject> GameObject::CreatePlane(float width, float length, glm::vec3 color) {
+  auto gameObject = std::make_shared<GameObject>();
+  gameObject->mesh = Shape::Plane::Create(width, length, color);
+  gameObject->color = color;
+
+  // Set default material properties
+  gameObject->material.ambient = color * 0.1f;
+  gameObject->material.diffuse = color * 0.8f;
+  gameObject->material.specular = glm::vec3(0.5f);
+  gameObject->material.shininess = 32.0f;
+
+  return gameObject;
+}
+
+std::shared_ptr<GameObject> GameObject::CreateTexturedPlane(
+    const std::string& texturePath, 
+    float width, 
+    float length, 
+    glm::vec3 color) {
+  
+  // Create texture
+  std::string textureFolderPath = "resources/textures";
+  unsigned int textureID = TextureFromFile(texturePath.c_str(), textureFolderPath, false);
+  
+  // Create texture object for the mesh
+  Texture diffuseTexture;
+  diffuseTexture.id = textureID;
+  diffuseTexture.type = "texture_diffuse";
+  diffuseTexture.path = texturePath;
+  
+  std::vector<Texture> textures = {diffuseTexture};
+  
+  // Create the plane with texture coordinates
+  auto gameObject = std::make_shared<GameObject>();
+  gameObject->mesh = Shape::Plane::CreateTextured(width, length, color, textures);
+  gameObject->color = color;
+  
+  // Set material properties with texture
+  gameObject->material.ambient = color * 0.1f;
+  gameObject->material.diffuse = color;
+  gameObject->material.specular = glm::vec3(0.5f);
+  gameObject->material.shininess = 32.0f;
+  gameObject->material.useTexture = true;
+  gameObject->material.diffuseMap = textureID;
 
   return gameObject;
 }

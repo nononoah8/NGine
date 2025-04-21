@@ -94,6 +94,7 @@ cube = {
     Model.DrawCube(0.1, self.pos)
     Model.DrawSphere(0.05, Vector3(0.8, 0.5, 0.0), 16, Vector3(z, x, y))
     Model.DrawModel("tree", Vector3(1, 0, 0))
+    Model.DrawTexturedPlane("dirt.jpg", 20.0, 20.0, Vector3(0.5, 0.8, 0.5), Vector3(0, -5, 0))
 
     if Application.GetFrame() % 1000 == 0 then
       local pos = Camera.GetPosition()

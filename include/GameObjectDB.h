@@ -13,6 +13,7 @@
 
 #include "Shapes/Sphere.h"
 #include "Shapes/Cube.h"
+#include "Shapes/Plane.h"
 #include "Mesh.h"
 #include "GameObject.h"
 
@@ -25,7 +26,9 @@ public:
   static std::shared_ptr<GameObject> CreateCube(float size = 1.0f, const glm::vec3& position = glm::vec3(0.0f));
   static std::shared_ptr<GameObject> CreateSphere(float radius = 1.0f, const glm::vec3& color = glm::vec3(1.0f), int segments = 16, const glm::vec3& position = glm::vec3(0.0f));
   static std::shared_ptr<GameObject> LoadModel(const std::string& path, const glm::vec3& position = glm::vec3(0.0f));
-  
+  static std::shared_ptr<GameObject> CreatePlane(float width = 1.0f, float length = 1.0f, const glm::vec3& color = glm::vec3(1.0f), const glm::vec3& position = glm::vec3(0.0f));
+  static std::shared_ptr<GameObject> CreateTexturedPlane(const std::string& texturePath,float width = 1.0f, float length = 1.0f, const glm::vec3& color = glm::vec3(1.0f), const glm::vec3& position = glm::vec3(0.0f));
+
   // Queue an object for rendering
   static void QueueForRendering(const std::shared_ptr<GameObject>& gameObject);
 
