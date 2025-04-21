@@ -77,13 +77,14 @@ std::shared_ptr<GameObject> GameObject::CreateSphere(float radius, glm::vec3 col
   return gameObject;
 }
 
-std::shared_ptr<GameObject> GameObject::LoadModel(const std::string& name) {
+std::shared_ptr<GameObject> GameObject::LoadModel(const std::string& name, const glm::vec3& scale) {
   auto gameObject = std::make_shared<GameObject>();
 
   std::string fp = "resources/models/" + name + "/" + name + ".obj";
   
   auto model = std::make_shared<Model>(fp);
   gameObject->model = model;
+  gameObject->scale = scale;
 
   // If model has meshes, use the first one for the GameObject
   if (!model->meshes.empty()) {

@@ -91,14 +91,14 @@ cube = {
     -- Update camera position
     Camera.SetPosition(xPos, yPos, zPos)
 
-    Model.DrawCube(0.1, self.pos)
-    Model.DrawSphere(0.05, Vector3(0.8, 0.5, 0.0), 16, Vector3(z, x, y))
-    Model.DrawModel("tree", Vector3(1, 0, 0))
-    Model.DrawTexturedPlane("dirt.jpg", 20.0, 20.0, Vector3(0.5, 0.8, 0.5), Vector3(0, -5, 0))
+    -- Model.DrawCube(0.1, self.pos)
+    -- Model.DrawSphere(0.05, Vector3(0.8, 0.5, 0.0), 16, Vector3(z, x, y))
+    local scale = Vector3(0.1, 0.1, 0.1)
+    Model.DrawModel("tree", Vector3(1, -4.8, 0), scale)
+    Model.DrawModel("tree", Vector3(0, -4.8, 2), scale)
+    Model.DrawModel("tree", Vector3(2, -4.8, 1), scale)
+    Model.DrawModel("tree", Vector3(4, -4.8, 2), scale)
 
-    if Application.GetFrame() % 1000 == 0 then
-      local pos = Camera.GetPosition()
-      Debug.Log("x: " .. pos.x .. ", y: " .. pos.y .. ", z: " .. pos.z)
-    end
+    Model.DrawTexturedPlane("dirt.jpg", 10.0, 10.0, Vector3(0.5, 0.8, 0.5), Vector3(0, -5, 0))
   end
 }

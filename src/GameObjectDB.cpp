@@ -160,20 +160,26 @@ std::shared_ptr<GameObject> GameObjectDB::CreateTexturedPlane(const std::string&
   return gameObject;
 }
 
-std::shared_ptr<GameObject> GameObjectDB::LoadModel(const std::string& name, const glm::vec3& position) {
-  if(gameObjectMap.find(name) != gameObjectMap.end()) {
-    auto gameObject = gameObjectMap[name];
+std::shared_ptr<GameObject> GameObjectDB::LoadModel(const std::string& name, const glm::vec3& position, const glm::vec3& scale) {
+  // The key should include the model name only
+  std::string key = "model_" + name;
+  
+  if(gameObjectMap.find(key) != gameObjectMap.end()) {
+    // Create a COPY of the cached model (not reuse the same one)
+    auto gameObject = std::make_shared<GameObject>(*gameObjectMap[key]);
     gameObject->position = position;
+    gameObject->scale = scale;
     gameObject->isModel = true;
 
     allGameObjects.push_back(gameObject);
     return gameObject;
-  }else {
-    auto gameObject = GameObject::LoadModel(name);
-    gameObjectMap[name] = gameObject;
+  } else {
+    auto gameObject = GameObject::LoadModel(name, scale);
     gameObject->position = position;
     gameObject->isModel = true;
     
+    // Cache the model template (not the positioned instance)
+    gameObjectMap[key] = gameObject;
     allGameObjects.push_back(gameObject);
     return gameObject;
   }
