@@ -9,9 +9,8 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug)
 endif()
 
-# Set output directories
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/Debug)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/Release)
+# Set output directly to the binary dir instead of Debug/Release subdirectories
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 # Use file(GLOB...) to find all source files
 file(GLOB_RECURSE SRC_FILES 
@@ -27,11 +26,16 @@ file(GLOB_RECURSE IMGUI_SRC_FILES
     "${CMAKE_SOURCE_DIR}/include/vendor/imgui/*.cpp"
 )
 
+file(GLOB_RECURSE JOLT_SRC_FILES
+    "${CMAKE_SOURCE_DIR}/include/vendor/Jolt/*.cpp"
+)
+
 # Define sources list
 set(SOURCES
     ${SRC_FILES}
     ${LUABRIDGE_SRC_FILES}
     ${IMGUI_SRC_FILES}
+    ${JOLT_SRC_FILES}
     ${CMAKE_SOURCE_DIR}/include/vendor/glad/glad.c
 )
 

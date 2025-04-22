@@ -42,3 +42,6 @@ CMakeError.log
 *.cmake
 *.cmake.user
 *.cmake.userstate
+
+app
+app.exe
