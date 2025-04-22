@@ -10,6 +10,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include "Input.h"
+#include "Gui.h"
 
 // Define static members
 int Renderer::x_resolution = 640;
@@ -92,6 +93,9 @@ void Renderer::RenderWindow(const std::string& title) {
         SDL_Quit();
         std::exit(1);
     }
+
+    Gui::InitGui(window, glContext, ImGuiTheme::Dark);
+
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -227,5 +231,6 @@ glm::mat4 Renderer::GetViewMatrix() {
 }
 
 void Renderer::Cleanup() {
+    Gui::Shutdown();
     SDL_GL_DeleteContext(glContext);
 }

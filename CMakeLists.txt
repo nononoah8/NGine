@@ -42,6 +42,7 @@ set(SOURCES
 include_directories(
     ${CMAKE_SOURCE_DIR}/include
     ${CMAKE_SOURCE_DIR}/include/vendor
+    ${CMAKE_SOURCE_DIR}/include/vendor/imgui
     ${CMAKE_SOURCE_DIR}/lib
     ${CMAKE_SOURCE_DIR}/lib/SDL2
     ${CMAKE_SOURCE_DIR}/lib/SDL2_Mixer
