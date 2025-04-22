@@ -70,6 +70,8 @@ void Renderer::RenderWindow(const std::string& title) {
     if(!window) {
         window = SDL_CreateWindow(title.c_str(), 100, 100, x_resolution, y_resolution, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN);
     }
+
+    SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN | SDL_WINDOW_FULLSCREEN_DESKTOP);
     
     if (!window) {
         std::cerr << "Failed to create SDL window: " << SDL_GetError() << std::endl;
@@ -105,6 +107,7 @@ bool Renderer::Update() {
     SDL_Event e;
     
     while (SDL_PollEvent(&e)) {
+        Gui::ProcessEvent(e);
         if (e.type == SDL_QUIT) {
             return false;
         }

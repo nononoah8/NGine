@@ -21,6 +21,8 @@
 #include "GameObject.h"
 #include "LightComponent.h"
 
+#include "Gui.h"
+
 #include "Application.hpp"
 
 int Application::frameNumber = 0;
@@ -80,9 +82,19 @@ void Engine::GameLoop() {
     float lastFrameTime = 0.0f;
     float deltaTime = 0.0f;
     
+    // Frame timing for 60 FPS lock
+    const float targetFrameTime = 1.0f / 60.0f; // 16.67ms per frame for 60fps
+
+    bool t = true;
+    
     while (running) {
+        // New Gui Frame!
+        Gui::NewFrame();
+
+        Uint32 frameStartTime = SDL_GetTicks();
+
         // Calculate delta time
-        float currentTime = static_cast<float>(SDL_GetTicks()) / 1000.0f;
+        float currentTime = static_cast<float>(frameStartTime) / 1000.0f;
         deltaTime = currentTime - lastFrameTime;
         lastFrameTime = currentTime;
 
@@ -108,6 +120,8 @@ void Engine::GameLoop() {
 
         shaderProgram->Use();
 
+        Gui::SceneHierarchyWindow(&current_scene);
+
         // Set view and projection (camera) uniforms
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
         glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
@@ -121,24 +135,26 @@ void Engine::GameLoop() {
         // Render 3d scene objects
         GameObjectDB::RenderAndClearObjects(shaderProgram->GetID(), modelLoc);
 
-        // Render all of the queued stuff
-        // ImageDB::RenderAndClearImages();
-
-        // Render all of the queued text
-        // TextDB::RenderText();
-
-        // Render all of the queued pixels
-        // ImageDB::RenderAndClearPixels();
-
         // Process pending event subscriptions
         EventSystem::ProcessPendingChanges();
-        
-        // Swap buffers at the end
-        Renderer::SwapBuffers();
 
         Input::LateUpdate();
 
         ++Application::frameNumber;
+        
+        // Render all the gui
+        Gui::Render();
+
+        // Swap buffers at the end
+        Renderer::SwapBuffers();
+
+        // Calculate how long the frame took
+        Uint32 frameTime = SDL_GetTicks() - frameStartTime;
+
+        // If frame completed too quickly, wait the remaining time
+        if (frameTime < targetFrameTime * 1000) {
+            SDL_Delay(targetFrameTime * 1000 - frameTime);
+        }
     }
 
     TextDB::Shutdown();

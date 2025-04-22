@@ -87,8 +87,8 @@ public:
     static void DontDestroy(const luabridge::LuaRef& actor_ref);
     static bool load_new_scene;
     static std::string scene_to_load;
-private:
     static std::vector<std::shared_ptr<Actor>> scene_actors;
+private:
     static std::unordered_map<std::string, std::shared_ptr<ActorTemplate>> templates;
     static std::vector<std::shared_ptr<Actor>> new_actors_to_add;
     static std::unordered_set<std::shared_ptr<Actor>> actors_to_remove;

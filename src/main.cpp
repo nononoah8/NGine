@@ -43,4 +43,8 @@ Next steps:
 * Skybox
 * Add physics engine - https://github.com/jrouwe/JoltPhysics, https://github.com/NVIDIA-Omniverse/PhysX, https://github.com/bulletphysics/bullet3, etc.
 * Paticle System
+* HUD stuff
+
+Misc stuff can add:
+* Frame cap you can choose
 */
