@@ -46,5 +46,6 @@ Next steps:
 * HUD stuff
 
 Misc stuff can add:
+* REALLY WANT TO ADD camera controller in the scene editor.
 * Frame cap you can choose
 */

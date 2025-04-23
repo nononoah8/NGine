@@ -295,7 +295,6 @@ void Scene::LoadComponent(const std::string& componentKey, const std::string& co
 void SetComponentProperties(luabridge::LuaRef& componentInstance, const rapidjson::Value& componentData) {
     for (auto& member : componentData.GetObject()) {
         std::string key = member.name.GetString();
-        std::cout << "[in scenedb] key: " << key << std::endl;
         if (member.value.IsString()) {
             componentInstance[key] = member.value.GetString();
         } else if (member.value.IsInt()) {

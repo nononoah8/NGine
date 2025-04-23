@@ -42,6 +42,9 @@ public:
   
   // Start the Scene Hierarchy stuff
   static void SceneHierarchyWindow(Scene* current_scene);
+
+  // Save the new Scene Hierarchy w new components and properties
+  static void SaveHierarchy();
 private:
   static ImGuiIO* io;
 };

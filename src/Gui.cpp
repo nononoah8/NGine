@@ -1,6 +1,8 @@
 #include "Gui.h"
 
 #include <unordered_map>
+#include "rapidjson/rapidjson.h"
+#include "rapidjson/document.h"
 
 ImGuiIO* Gui::io = nullptr;
 
@@ -122,6 +124,10 @@ bool Gui::ColorEdit4(const char* label, float col[4]) {
 // Start the Engine specific gui's
 void Gui::SceneHierarchyWindow(Scene* current_scene) {
   static std::shared_ptr<Component> selectedComponent = nullptr;
+  static bool showComponentPopup = false;
+  static int activeActorId= -1;
+  static bool showCreateCustomPopup = false;
+  static char customComponentName[128] = "";
 
   // If scene doesn't exist, want to break out of fn.
   if(!current_scene) return;
@@ -136,7 +142,7 @@ void Gui::SceneHierarchyWindow(Scene* current_scene) {
   ImGui::SetNextWindowSize(ImVec2(windowWidth, windowHeight), ImGuiCond_FirstUseEver);
 
   // Add a parent window that will contain the child windows
-  ImGui::Begin("Scene Inspector", nullptr, ImGuiWindowFlags_NoCollapse);
+  ImGui::Begin("Scene Inspector", nullptr);
 
   // Left side: Scene hierarchy
   ImGui::BeginChild("SceneHierarchy", ImVec2(hierarchyWidth, 0), true);
@@ -155,15 +161,24 @@ void Gui::SceneHierarchyWindow(Scene* current_scene) {
 
     if (ImGui::BeginPopup(("ActorContextMenu_" + actor->GetID()))) {
       if (ImGui::MenuItem("Add Component")) {
-        // TODO: Show component selection popup
+        // TODO: Show component creation popup
+        // The popup should have a option for a lightcomponent/c++ component
+        // If it's none of the above, it should give the option to name the new component
+        // This new component should create a file: resources/component_types/'name'.lua
+        // If the component file above DOES exist, just create the component based on that file.
+        // It should also open in your code editor (if possible).
+        showComponentPopup = true;
+        activeActorId = actor->GetID();
       }
       
       if (ImGui::MenuItem("Delete Actor")) {
         // TODO: Handle actor deletion
+        // Call scene::delete actor, but be able to use the id instead of the actor ref.
       }
       
       ImGui::EndPopup();
     }
+
     if (actorOpen) {
       // Display components for this actor
       for (const auto& [key, component] : actor->components) {
@@ -186,13 +201,95 @@ void Gui::SceneHierarchyWindow(Scene* current_scene) {
       ImGui::TreePop();
     }
   }
+
   ImGui::EndChild();
+
+  if (showComponentPopup) {
+    ImGui::OpenPopup("ComponentCreationPopup");
+    showComponentPopup = false; // Reset flag after opening
+  }
+  
+  // Handle the component creation popup
+  if (ImGui::BeginPopupModal("ComponentCreationPopup", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+    // Find the target actor
+    std::shared_ptr<Actor> targetActor = nullptr;
+    for (auto& a : Scene::scene_actors) {
+      if (a->GetID() == activeActorId) {
+        targetActor = a;
+        break;
+      }
+    }
+    
+    if (targetActor) {
+      ImGui::Text("Creating Component For: %s", targetActor->name.c_str());
+      
+      // Component buttons...
+      if (ImGui::Button("Light Component", ImVec2(200, 30))) {
+        // Add light component...
+        targetActor->AddComponent("Light");
+        ImGui::CloseCurrentPopup();
+      }
+      
+      if (ImGui::Button("Custom Component", ImVec2(200, 30))) {
+        showCreateCustomPopup = true;
+        customComponentName[0] = '\0';
+        ImGui::CloseCurrentPopup();
+      }
+      
+      if (ImGui::Button("Cancel", ImVec2(200, 30))) {
+        ImGui::CloseCurrentPopup();
+      }
+    }
+    
+    ImGui::EndPopup();
+  }
+
+  if(showCreateCustomPopup) {
+    ImGui::OpenPopup("CustomCreationPopup");
+    showComponentPopup = false; // Reset flag after opening
+  }
+
+  if(ImGui::BeginPopupModal("CustomCreationPopup", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+    ImGui::Text("Enter component name:");
+    bool enterPressed = ImGui::InputText("##ComponentName", customComponentName, sizeof(customComponentName), ImGuiInputTextFlags_EnterReturnsTrue);
+    
+    bool createClicked = ImGui::Button("Create", ImVec2(95, 30));
+    ImGui::SameLine();
+
+
+    if(enterPressed || createClicked) {
+      if(strlen(customComponentName) > 0) {
+        // Find the target actor using the activeActorId
+        std::shared_ptr<Actor> targetActor = nullptr;
+        for (auto& a : Scene::scene_actors) {
+          if (a->GetID() == activeActorId) {
+            targetActor = a;
+            break;
+          }
+        }
+
+        std::string componentName = std::string(customComponentName);
+        targetActor->AddComponentFromGui(componentName);
+
+        showCreateCustomPopup = false;
+        ImGui::CloseCurrentPopup();
+      }
+    }
+
+    // Cancel button
+    if (ImGui::Button("Cancel", ImVec2(200, 30))) {
+      showCreateCustomPopup = false;
+      ImGui::CloseCurrentPopup();
+    }
+
+    ImGui::EndPopup();
+  }
 
   // Second window: Component Properties (positioned at top-right)
   ImGui::SetNextWindowPos(ImVec2(displaySize.x - 320, 20), ImGuiCond_FirstUseEver);
   ImGui::SetNextWindowSize(ImVec2(200, 400), ImGuiCond_FirstUseEver);
   
-  if (ImGui::Begin("Component Properties", nullptr, ImGuiWindowFlags_NoCollapse)) {
+  if (ImGui::Begin("Component Properties", nullptr)) {
     if (selectedComponent) {
       ImGui::Text("Properties: %s", selectedComponent->type.c_str());
       ImGui::Separator();
@@ -290,59 +387,56 @@ void Gui::SceneHierarchyWindow(Scene* current_scene) {
                 continue;
               }
               
-      // Create a unique ID for each property control to avoid ID conflicts
-      ImGui::PushID(key.c_str());
-      
-      // Handle different types
-      if(value.isNumber()) {
-        // Get fresh value directly from the component
-        float numValue = static_cast<float>((*componentRef)[key.c_str()].cast<double>());
-        if(ImGui::SliderFloat(key.c_str(), &numValue, -100.0f, 100.0f)) {
-          // Set value directly on the componentRef, not the temporary value reference
-          (*componentRef)[key.c_str()] = numValue;
-        }
-      }
-      else if(value.isBool()) {
-        // Get fresh value directly from the component
-        bool boolValue = (*componentRef)[key.c_str()].cast<bool>();
-        if(ImGui::Checkbox(key.c_str(), &boolValue)) {
-          // Set value directly on the componentRef
-          (*componentRef)[key.c_str()] = boolValue;
-        }
-      }
-      else if(value.isString()) {
-        // Display as text for now
-        ImGui::Text("%s: %s", key.c_str(), (*componentRef)[key.c_str()].cast<std::string>().c_str());
-      }
-      else if(value.isUserdata()) {
-        // Try to handle as vec3 if appropriate
-        if(value["x"].isNumber() && value["y"].isNumber() && value["z"].isNumber()) {
-          // Get fresh vector values
-          float vec[3] = {
-            static_cast<float>((*componentRef)[key.c_str()]["x"].cast<double>()),
-            static_cast<float>((*componentRef)[key.c_str()]["y"].cast<double>()),
-            static_cast<float>((*componentRef)[key.c_str()]["z"].cast<double>())
-          };
-          
-          if(ImGui::DragFloat3(key.c_str(), vec, 0.1f)) {
-            // Update the vector directly
-            (*componentRef)[key.c_str()]["x"] = vec[0];
-            (*componentRef)[key.c_str()]["y"] = vec[1];
-            (*componentRef)[key.c_str()]["z"] = vec[2];
-          }
-        }
-        else {
-          ImGui::Text("%s: [userdata]", key.c_str());
-        }
-      }
-      else if(value.isFunction()) {
-        ImGui::Text("%s: [function]", key.c_str());
-      }
-      else if(value.isTable()) {
-        ImGui::Text("%s: [table]", key.c_str());
-      }
-      
-      ImGui::PopID();
+              // Create a unique ID for each property control to avoid ID conflicts
+              ImGui::PushID(key.c_str());
+              
+              // Handle different types
+              if(value.isNumber()) {
+                // Get fresh value directly from the component
+                float numValue = static_cast<float>((*componentRef)[key.c_str()].cast<double>());
+                if(ImGui::SliderFloat(key.c_str(), &numValue, -100.0f, 100.0f)) {
+                  // Set value directly on the componentRef, not the temporary value reference
+                  (*componentRef)[key.c_str()] = numValue;
+                }
+              }
+              else if(value.isBool()) {
+                // Get fresh value directly from the component
+                bool boolValue = (*componentRef)[key.c_str()].cast<bool>();
+                if(ImGui::Checkbox(key.c_str(), &boolValue)) {
+                  // Set value directly on the componentRef
+                  (*componentRef)[key.c_str()] = boolValue;
+                }
+              }
+              else if(value.isString()) {
+                // Display as text for now
+                ImGui::Text("%s: %s", key.c_str(), (*componentRef)[key.c_str()].cast<std::string>().c_str());
+              }
+              else if(value.isUserdata()) {
+                // Try to handle as vec3 if appropriate
+                if(value["x"].isNumber() && value["y"].isNumber() && value["z"].isNumber()) {
+                  // Get fresh vector values
+                  float vec[3] = {
+                    static_cast<float>((*componentRef)[key.c_str()]["x"].cast<double>()),
+                    static_cast<float>((*componentRef)[key.c_str()]["y"].cast<double>()),
+                    static_cast<float>((*componentRef)[key.c_str()]["z"].cast<double>())
+                  };
+                  
+                  if(ImGui::DragFloat3(key.c_str(), vec, 0.1f)) {
+                    // Update the vector directly
+                    (*componentRef)[key.c_str()]["x"] = vec[0];
+                    (*componentRef)[key.c_str()]["y"] = vec[1];
+                    (*componentRef)[key.c_str()]["z"] = vec[2];
+                  }
+                }
+                else {
+                  ImGui::Text("%s: [userdata]", key.c_str());
+                }
+              }
+              else if(value.isTable()) {
+                ImGui::Text("%s: [table]", key.c_str());
+              }
+              
+              ImGui::PopID();
             }
           }
         }
@@ -355,22 +449,6 @@ void Gui::SceneHierarchyWindow(Scene* current_scene) {
   ImGui::End();
   ImGui::End();
 }
-
-// Have Every Scene Actor in scene_actors with its own dropdown and looping thru scene's: `static std::vector<std::shared_ptr<Actor>> scene_actors;`
-  // Each dropdown will show each of the components, by looking at the actor and looping thru actor's: `std::map<std::string, std::shared_ptr<Component>> components;`
-  // You shoule be able to click on an actor to expand the component dropdown
-  // You should also be able to click on a component to get its properties
-  //  * If it's a LightComponent (Or a c++ component), you can edit all of its properties like for light: color, intensity, etc
-  // If it's a lua component, shoudl also be able to edit its overrides with text.
-  // Finally, cache this somewhere so you don't need to loop thru every component and every actor every time for something that isn't changing
-
-
-
-// Ultimately want a way for whenever you click play/start the scene, and run the components, 
-// it will rewrite the json file with the new properties.
-
-
-
 
 void Gui::Shutdown() {
   ImGui_ImplOpenGL3_Shutdown();

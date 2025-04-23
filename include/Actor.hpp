@@ -14,6 +14,8 @@
 #include <vector>
 #include <map>
 #include <algorithm>
+#include <filesystem>
+#include <fstream>
 
 #include "Component.h"
 #include "ComponentDB.hpp"
@@ -141,6 +143,37 @@ public:
             return luabridge::LuaRef(ComponentManager::lua_state, std::static_pointer_cast<LightComponent>(newComponent).get());
         } else {
             return componentInstance;
+        }
+    }
+
+    void AddComponentFromGui(std::string& type_name) {
+        // Check if the component file exists
+        // resources/component_types/type_name.lua
+        std::string fp = "resources/component_types/" + type_name + ".lua";
+
+        if(std::filesystem::exists(fp)) {
+            // Type exists, so just add like normal
+            this->AddComponent(type_name);
+        }else {
+            // Make sure directory exists
+            std::filesystem::create_directory("resources/component_types");
+            std::ofstream file(fp);
+            if(file.is_open()) {
+                file << type_name << " = {\n";
+                file << "\t-- Lifecycle function that runs at the components creation\n";
+                file << "\tOnStart = function(self)\n\n";
+                file << "\tend,\n\n";
+                file << "\t-- Lifecycle funcion that runs every frame\n";
+                file << "\tOnUpdate = function(self)\n\n";
+                file << "\tend,\n\n";
+                file << "\t-- Lifecycle funcion that runs at the end of every frame\n";
+                file << "\tOnLateUpdate = function(self)\n\n";
+                file << "\tend\n";
+                file << "}";
+                file.close();
+            }
+
+            this->AddComponent(type_name);
         }
     }
 
