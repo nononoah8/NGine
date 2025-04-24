@@ -11,9 +11,13 @@
 #include "ComponentDB.hpp"
 #include "LightComponent.h"
 
+#include "rapidjson/prettywriter.h"
+#include "rapidjson/filewritestream.h"
+
 void ReportError(std::string& actor_name, const luabridge::LuaException& e);
 std::shared_ptr<Component> LoadExistingComponent(std::shared_ptr<Component> component);
 void SetComponentProperties(luabridge::LuaRef& componentInstance, const rapidjson::Value& componentData);
+std::unordered_map<std::string, luabridge::LuaRef> getKeyValueMap(luabridge::LuaRef& table);
 
 // Adding all of the static member variables so I can use them in the program
 std::vector<std::shared_ptr<Actor>> Scene::scene_actors;
@@ -391,6 +395,9 @@ void Scene::Update() {
             if ((*component->componentRef)["OnDestroy"].isFunction()) {
                 (*component->componentRef)["OnDestroy"](*component->componentRef);
             }
+            if(component->isLC) {
+                LightComponent::UnregisterLight(std::static_pointer_cast<LightComponent>(component));
+            }
         } catch (luabridge::LuaException const& e) {
             ReportError(component->actor->name, e);
         }
@@ -580,6 +587,51 @@ void Scene::RemoveActor(const luabridge::LuaRef& actor_ref) {
         }
     }
 }
+
+// Remove the Actor from the scene based on id
+void Scene::RemoveActorById(const int actor_id) {
+    // Have the actor name, and its uuid
+    int id = actor_id;
+    std::shared_ptr<Actor> actor_to_remove = nullptr;
+
+    for(auto& actor : scene_actors) {
+        if(actor->id == id) {
+            actor_to_remove = actor;
+            for(auto component : actor->components) {
+                component.second->enabled = false;
+                (*component.second->componentRef)["enabled"] = false;
+                if(component.second->hasDestroy || component.second->isLC) {
+                    onDestroyComponents.push_back(component.second);
+                }
+            }
+            actors_to_remove.insert(actor);
+        }
+    }
+
+    for(auto& actor : new_actors_to_add) {
+        if(actor->id == id) {
+            actor_to_remove = actor;
+            for(auto component : actor->components) {
+                component.second->enabled = false;
+                (*component.second->componentRef)["enabled"] = false;
+                if(component.second->hasDestroy || component.second->isLC) {
+                    onDestroyComponents.push_back(component.second);
+                }
+            }
+            actors_to_remove.insert(actor);
+        }
+    }
+
+    // Remove the actor from the actor_name_map
+    auto it = actor_name_map.find(actor_to_remove->name);
+    if (it != actor_name_map.end()) {
+        it->second.erase(std::remove_if(it->second.begin(), it->second.end(),
+            [id](const std::shared_ptr<Actor>& a) { return a->id == id; }), it->second.end());
+        if (it->second.empty()) {
+            actor_name_map.erase(it);
+        }
+    }
+}
  
 void Scene::TemplateToSpawn(const std::string& template_name) {
     std::string templateFp = "resources/actor_templates/" + template_name + ".template";
@@ -637,4 +689,176 @@ void Scene::DontDestroy(const luabridge::LuaRef& actor_ref) {
             }
         }
     }
+}
+
+bool Scene::SaveToFile(std::string& filename) {
+    // Create a new JSON document
+    rapidjson::Document document;
+    document.SetObject();
+    rapidjson::Document::AllocatorType& allocator = document.GetAllocator();
+    
+    // Create actors array
+    rapidjson::Value actorsArray(rapidjson::kArrayType);
+    
+    // Loop through every actor in the scene
+    for(const auto& actor : scene_actors) {
+        rapidjson::Value actorObject(rapidjson::kObjectType);
+
+        // Add the actor's name
+        rapidjson::Value nameValue;
+        nameValue.SetString(actor->name.c_str(), allocator);
+        actorObject.AddMember("name", nameValue, allocator);
+
+        // Add template name if it exists
+        if (!actor->template_name.empty()) {
+            rapidjson::Value templateValue;
+            templateValue.SetString(actor->template_name.c_str(), allocator);
+            actorObject.AddMember("template", templateValue, allocator);
+        }
+
+        // Create components object
+        rapidjson::Value componentsObj(rapidjson::kObjectType);
+        int newCompKey = 1;
+
+        // Loop through each actor component
+        for(const auto& [key, component] : actor->components) {
+            // Set new keys for the components bc of runtime components.
+
+            rapidjson::Value componentObj(rapidjson::kObjectType);
+            
+            // Add the component type
+            rapidjson::Value typeValue;
+            typeValue.SetString(component->type.c_str(), allocator);
+            componentObj.AddMember("type", typeValue, allocator);
+
+            // Handle the components.
+            if(component->isLC) {
+                // Light Component
+                auto lightComponent = std::static_pointer_cast<LightComponent>(component);
+                
+                // Add light type
+                rapidjson::Value lightTypeValue;
+                switch (lightComponent->GetType()) {
+                    case static_cast<int>(LightType::DIRECTIONAL):
+                        lightTypeValue.SetString("DIRECTIONAL", allocator);
+                        break;
+                    case static_cast<int>(LightType::POINT):
+                        lightTypeValue.SetString("POINT", allocator);
+                        break;
+                    case static_cast<int>(LightType::SPOT):
+                        lightTypeValue.SetString("SPOT", allocator);
+                        break;
+                }
+                componentObj.AddMember("lightType", lightTypeValue, allocator);
+                
+                // Add the light position.
+                glm::vec3 position = lightComponent->GetPosition();
+                componentObj.AddMember("positionX", position.x, allocator);
+                componentObj.AddMember("positionY", position.y, allocator);
+                componentObj.AddMember("positionZ", position.z, allocator);
+
+                // Add the light direction
+                glm::vec3 direction = lightComponent->GetDirection();
+                componentObj.AddMember("directionX", direction.x, allocator);
+                componentObj.AddMember("directionY", direction.y, allocator);
+                componentObj.AddMember("directionZ", direction.z, allocator);
+
+                // Add the light color
+                glm::vec3 color = lightComponent->GetColor();
+                componentObj.AddMember("colorR", color.r, allocator);
+                componentObj.AddMember("colorG", color.g, allocator);
+                componentObj.AddMember("colorB", color.b, allocator);
+
+                // Add the light's intensity
+                float intensity = lightComponent->GetIntensity();
+                componentObj.AddMember("intensity", intensity, allocator);
+
+                // Add attenuation factors
+                float constant = lightComponent->GetConstant();
+                float linear = lightComponent->GetLinear();
+                float quadratic = lightComponent->GetQuadratic();
+                componentObj.AddMember("constant", constant, allocator);
+                componentObj.AddMember("linear", linear, allocator);
+                componentObj.AddMember("quadratic", quadratic, allocator);
+
+                // Add cutoff params
+                float innerCutoff = lightComponent->GetInnerCutoff();
+                float outerCutoff = lightComponent->GetOuterCutoff();
+                componentObj.AddMember("innerCutoff", innerCutoff, allocator);
+                componentObj.AddMember("outerCutoff", outerCutoff, allocator);
+
+                // Add light name
+                rapidjson::Value lightNameValue;
+                lightNameValue.SetString(lightComponent->GetName().c_str(), allocator);
+                componentObj.AddMember("name", lightNameValue, allocator);
+            }else {
+                // Lua Component
+                luabridge::LuaRef& componentRef = *component->componentRef;
+
+                // Loop thru all the key value table stuff
+                for(auto& pair : getKeyValueMap(componentRef)) {
+                    auto& key = pair.first;
+                    auto& value = pair.second;
+
+                    // Want to skip all of the functions
+                    if(key == "key" || key == "type" || key == "self" || key[0] == '_' ||
+                        value.isFunction() || key == "actor" || key == "__self") {
+                        continue;
+                    }
+
+                    if(value.isNumber()) {
+                        float currentValue = componentRef[key.c_str()].cast<float>();
+                        componentObj.AddMember(rapidjson::Value(key.c_str(), allocator).Move(), currentValue, allocator);
+                    }
+
+                    if(value.isString()) {
+                        std::string currentValue = componentRef[key.c_str()].cast<std::string>();
+                        rapidjson::Value stringValue;
+                        stringValue.SetString(currentValue.c_str(), allocator);
+                        componentObj.AddMember(rapidjson::Value(key.c_str(), allocator).Move(), stringValue, allocator);
+                    }
+
+                    if(value.isBool()) {
+                        bool currentValue = componentRef[key.c_str()].cast<bool>();
+                        componentObj.AddMember(rapidjson::Value(key.c_str(), allocator).Move(), currentValue, allocator);
+                    }
+                }
+            }
+
+            // Add component to components object
+            rapidjson::Value keyValue;
+            keyValue.SetString(std::to_string(newCompKey).c_str(), allocator);
+            componentsObj.AddMember(keyValue, componentObj, allocator);
+
+            ++newCompKey;
+        }
+
+        actorObject.AddMember("components", componentsObj, allocator);
+
+        actorsArray.PushBack(actorObject, allocator);
+    }
+
+    document.AddMember("actors", actorsArray, allocator);
+
+    // Create directory if it doesn't exist
+    std::filesystem::path filePath(filename);
+    std::filesystem::create_directories(filePath.parent_path());
+    
+    // Write JSON to file
+    FILE* fp = fopen(filename.c_str(), "w");
+    if (!fp) {
+        std::cerr << "Failed to open file for writing: " << filename << std::endl;
+        return false;
+    }
+
+    char writeBuffer[65536];
+    rapidjson::FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
+    rapidjson::PrettyWriter<rapidjson::FileWriteStream> writer(os);
+    writer.SetMaxDecimalPlaces(4);
+    document.Accept(writer);
+    
+    fclose(fp);
+    
+    std::cout << "Scene saved to: " << filename << std::endl;
+    return true;
 }

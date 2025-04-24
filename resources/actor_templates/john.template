@@ -1,0 +1,8 @@
+{
+    "name": "John",
+    "components": {
+        "1": {
+          "type": "new_comp"
+        }
+    }
+}

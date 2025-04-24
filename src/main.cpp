@@ -39,8 +39,10 @@ int main(int argc, char* argv[]) {
 /*
 Next steps:
 * UI Framework (Dear ImGui)
+    * Need to fix a little bit with the actor templates and components
+    * Need to also add the hot reloading stuff.
 * Textures on cube/sphere and shapes
-* Skybox
+    * Skybox
 * Add physics engine - https://github.com/jrouwe/JoltPhysics, https://github.com/NVIDIA-Omniverse/PhysX, https://github.com/bulletphysics/bullet3, etc.
 * Paticle System
 * HUD stuff

@@ -127,7 +127,9 @@ void Gui::SceneHierarchyWindow(Scene* current_scene) {
   static bool showComponentPopup = false;
   static int activeActorId= -1;
   static bool showCreateCustomPopup = false;
+  static bool showCreateActorPopup = false;
   static char customComponentName[128] = "";
+  static char actorNameBuffer[128] = "";
 
   // If scene doesn't exist, want to break out of fn.
   if(!current_scene) return;
@@ -145,9 +147,53 @@ void Gui::SceneHierarchyWindow(Scene* current_scene) {
   ImGui::Begin("Scene Inspector", nullptr);
 
   // Left side: Scene hierarchy
-  ImGui::BeginChild("SceneHierarchy", ImVec2(hierarchyWidth, 0), true);
+  ImGui::BeginChild("SceneHierarchy", ImVec2(hierarchyWidth, -40), true);
   ImGui::Text("Scene: %s", Scene::GetCurrent().c_str());
   ImGui::Separator();
+
+  if (ImGui::IsMouseClicked(ImGuiMouseButton_Right) && ImGui::IsWindowHovered() && !ImGui::IsAnyItemHovered()) {
+    ImGui::OpenPopup("SceneCtxMenu");
+  }
+
+  if(ImGui::BeginPopup("SceneCtxMenu")) {
+    if(ImGui::MenuItem("Create Actor")) {
+      showCreateActorPopup = true;
+      actorNameBuffer[0] = '\0'; // Clear buffer
+      ImGui::CloseCurrentPopup();
+    }
+    ImGui::EndPopup();
+  }
+
+  // Handle create actor popup
+  if(showCreateActorPopup) {
+    ImGui::OpenPopup("CreateActorPopup");
+    showCreateActorPopup = false; // Reset flag
+  }
+
+  if(ImGui::BeginPopupModal("CreateActorPopup", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+    ImGui::Text("Enter actor name:");
+    bool enterPressed = ImGui::InputText("##ActorName", actorNameBuffer, sizeof(actorNameBuffer), ImGuiInputTextFlags_EnterReturnsTrue);
+    
+    bool createClicked = ImGui::Button("Create", ImVec2(95, 30));
+    ImGui::SameLine();
+    
+    // Cancel button
+    if(ImGui::Button("Cancel", ImVec2(95, 30))) {
+      ImGui::CloseCurrentPopup();
+    }
+    
+    // Handle actor creation
+    if(enterPressed || createClicked) {
+      if(strlen(actorNameBuffer) > 0) {
+        // Create a new actor with the given name
+        Scene::InstantiateActor(actorNameBuffer);
+
+        ImGui::CloseCurrentPopup();
+      }
+    }
+  
+    ImGui::EndPopup();
+  }
 
   // Loop through all the actors in the scene
   for(const auto& actor : Scene::scene_actors) {
@@ -161,19 +207,12 @@ void Gui::SceneHierarchyWindow(Scene* current_scene) {
 
     if (ImGui::BeginPopup(("ActorContextMenu_" + actor->GetID()))) {
       if (ImGui::MenuItem("Add Component")) {
-        // TODO: Show component creation popup
-        // The popup should have a option for a lightcomponent/c++ component
-        // If it's none of the above, it should give the option to name the new component
-        // This new component should create a file: resources/component_types/'name'.lua
-        // If the component file above DOES exist, just create the component based on that file.
-        // It should also open in your code editor (if possible).
         showComponentPopup = true;
         activeActorId = actor->GetID();
       }
       
       if (ImGui::MenuItem("Delete Actor")) {
-        // TODO: Handle actor deletion
-        // Call scene::delete actor, but be able to use the id instead of the actor ref.
+        Scene::RemoveActorById(actor->GetID());
       }
       
       ImGui::EndPopup();
@@ -282,6 +321,35 @@ void Gui::SceneHierarchyWindow(Scene* current_scene) {
       ImGui::CloseCurrentPopup();
     }
 
+    ImGui::EndPopup();
+  }
+
+  ImGui::Separator();
+  ImGui::SetCursorPosX((ImGui::GetWindowWidth() - 120) * 0.5f); // Center the button
+  if (ImGui::Button("Save Scene", ImVec2(120, 30))) {
+    std::string scenePath = "resources/scenes/" + Scene::GetCurrent() + ".scene";
+    if(current_scene->SaveToFile(scenePath)) {
+      ImGui::OpenPopup("SaveSuccessPopup");
+    }else {
+      ImGui::OpenPopup("SaveErrorPopup");
+    }
+  }
+
+  // Success popup
+  if (ImGui::BeginPopup("SaveSuccessPopup")) {
+    ImGui::Text("Scene saved successfully!");
+    if (ImGui::Button("OK")) {
+      ImGui::CloseCurrentPopup();
+    }
+    ImGui::EndPopup();
+  }
+
+  // Error popup
+  if (ImGui::BeginPopup("SaveErrorPopup")) {
+    ImGui::Text("Error saving scene!");
+    if (ImGui::Button("OK")) {
+      ImGui::CloseCurrentPopup();
+    }
     ImGui::EndPopup();
   }
 

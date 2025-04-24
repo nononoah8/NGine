@@ -1,30 +1,62 @@
 {
-  "actors": [
-    {
-      "name": "cube",
-      "components": {
-        "1": {
-          "type": "cube"
-        }
-      }
-    },
-    {
-      "name": "LightActor",
-      "components": {
-        "1": {
-          "type": "Light"
+    "actors": [
+        {
+            "name": "cube",
+            "components": {
+                "1": {
+                    "type": "cube",
+                    "enabled": true,
+                    "speed": 0.09,
+                    "camMoveSpeed": 0.3,
+                    "camAngleSpeed": 1.0,
+                    "radius": 3.224
+                }
+            }
         },
-        "2": {
-          "type": "Light",
-          "positionX": 1,
-          "positionY": -1,
-          "positionX": 1,
-          "intensity": 10,
-          "colorR": 0.8,
-          "colorG": 0.5,
-          "colorB": 0.2
+        {
+            "name": "LightActor",
+            "components": {
+                "1": {
+                    "type": "Light",
+                    "lightType": "POINT",
+                    "positionX": 0.0,
+                    "positionY": 0.0,
+                    "positionZ": 0.0,
+                    "directionX": 0.0,
+                    "directionY": -1.0,
+                    "directionZ": 0.0,
+                    "colorR": 1.0,
+                    "colorG": 1.0,
+                    "colorB": 1.0,
+                    "intensity": 1.0,
+                    "constant": 1.0,
+                    "linear": 0.09,
+                    "quadratic": 0.032,
+                    "innerCutoff": 12.5,
+                    "outerCutoff": 17.5,
+                    "name": "Light"
+                },
+                "2": {
+                    "type": "Light",
+                    "lightType": "POINT",
+                    "positionX": 1.0,
+                    "positionY": -1.0,
+                    "positionZ": 0.0,
+                    "directionX": 0.0,
+                    "directionY": -1.0,
+                    "directionZ": 0.0,
+                    "colorR": 0.8,
+                    "colorG": 0.5,
+                    "colorB": 0.2,
+                    "intensity": 10.0,
+                    "constant": 1.0,
+                    "linear": 0.09,
+                    "quadratic": 0.032,
+                    "innerCutoff": 12.5,
+                    "outerCutoff": 17.5,
+                    "name": "Light"
+                }
+            }
         }
-      }
-    }
-  ]
+    ]
 }

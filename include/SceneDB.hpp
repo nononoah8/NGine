@@ -16,9 +16,6 @@
 #include "ReadJSON.h"
 #include "TemplateDB.hpp"
 #include "Actor.hpp"
-// #include "SDL2_Image/SDL_image.h"
-// #include "Renderer.h"
-// #include "Helper.h"
 
 class Scene {
 public:
@@ -29,6 +26,7 @@ public:
     static void TemplateToSpawn(const std::string& template_name);
     static luabridge::LuaRef InstantiateActor(const std::string& template_name);
     static void RemoveActor(const luabridge::LuaRef& actor);
+    static void RemoveActorById(const int actor_id);
     static std::string GetCurrent();
 
     ~Scene() {
@@ -83,6 +81,7 @@ public:
         return actors;
     }
 
+    bool SaveToFile(std::string& filename);
     static void LoadNewScene(const std::string& new_scene);
     static void DontDestroy(const luabridge::LuaRef& actor_ref);
     static bool load_new_scene;
